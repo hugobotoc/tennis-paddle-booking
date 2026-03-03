@@ -1,17 +1,34 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { mockLogout } from '$lib/auth';
   import { authStore } from '$lib/stores/auth';
+  import { onMount } from 'svelte';
+
+  let isLoading = true;
+
+  onMount(() => {
+    // Client-side auth check (only runs in browser, not on SSR)
+    if (!$authStore) {
+      goto('/login');
+    }
+    isLoading = false;
+  });
 
   async function handleLogout() {
-    await mockLogout();
-    authStore.logout();
+    await authStore.logout();
     await goto('/login');
   }
 </script>
 
-<div class="min-h-screen bg-base-100">
-  <!-- Navigation Bar -->
+{#if isLoading}
+  <div class="min-h-screen flex items-center justify-center bg-base-100">
+    <div class="flex flex-col items-center gap-4">
+      <div class="loading loading-spinner loading-lg" />
+      <p class="text-lg opacity-70">Loading...</p>
+    </div>
+  </div>
+{:else}
+  <div class="min-h-screen bg-base-100">
+    <!-- Navigation Bar -->
   <div class="navbar bg-base-200 shadow">
     <div class="flex-1">
       <a href="/dashboard" class="btn btn-ghost normal-case text-xl"> 🎾 Tennis Paddle Booking </a>
@@ -106,7 +123,8 @@
       </div>
     </div>
   </div>
-</div>
+  </div>
+{/if}
 
 <style>
   /* Mobile-first responsive adjustments */

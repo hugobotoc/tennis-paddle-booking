@@ -52,7 +52,7 @@
         <p class="text-center text-sm opacity-70 mb-6">Log in to your account</p>
 
         {#if error}
-          <div class="alert alert-error" role="alert">
+          <div class="alert alert-error" role="alert" aria-live="polite" aria-atomic="true">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="stroke-current shrink-0 h-6 w-6"
@@ -91,31 +91,21 @@
               <span class="label-text">Password</span>
             </label>
             <div class="relative">
-              {#if showPassword}
-                <input
-                  id="password"
-                  type="text"
-                  placeholder="••••••••"
-                  class="input input-bordered w-full"
-                  bind:value={password}
-                  disabled={isLoading}
-                  required
-                />
-              {:else}
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  class="input input-bordered w-full"
-                  bind:value={password}
-                  disabled={isLoading}
-                  required
-                />
-              {/if}
+              <input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                class="input input-bordered w-full password-input"
+                class:show-password={showPassword}
+                bind:value={password}
+                disabled={isLoading}
+                required
+              />
               <button
                 type="button"
                 class="absolute right-3 top-3 text-sm opacity-60 hover:opacity-100"
                 on:click={() => (showPassword = !showPassword)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
                 tabindex="-1"
               >
                 {showPassword ? '👁️' : '👁️‍🗨️'}
@@ -166,6 +156,11 @@
 </div>
 
 <style>
+  /* Password visibility toggle using CSS (no DOM recreation) */
+  :global(input.password-input.show-password) {
+    -webkit-text-security: none;
+  }
+
   /* Mobile-first responsive adjustments */
   @media (max-width: 640px) {
     :global(.min-h-screen) {

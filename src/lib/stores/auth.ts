@@ -6,28 +6,48 @@
  */
 
 import { writable, type Writable } from 'svelte/store';
-import { getCurrentUser, type User } from '$lib/auth';
+import { getCurrentUser, mockLogout, type User } from '$lib/auth';
 
-function createAuthStore(): Writable<User | null> {
-  const { subscribe, set, update } = writable<User | null>(null);
+/**
+ * Custom store interface that extends Writable with auth methods
+ */
+interface AuthStore extends Writable<User | null> {
+  login(user: User): Promise<void>;
+  logout(): Promise<void>;
+}
 
-  // Initialize with current user on store creation
-  if (typeof window !== 'undefined') {
-    const user = getCurrentUser();
-    set(user);
-  }
+/**
+ * Create the auth store with proper TypeScript support
+ */
+function createAuthStore(): AuthStore {
+  const { subscribe, set } = writable<User | null>(getCurrentUser());
 
   return {
     subscribe,
     set,
-    update,
-    login: async (user: User) => {
-      set(user);
+    update: (fn) => {
+      // update is exposed but not recommended; use login/logout instead
+      const current = getCurrentUser();
+      const updated = fn(current);
+      if (updated !== current) {
+        set(updated);
+      }
     },
-    logout: async () => {
+    async login(user: User) {
+      set(user);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('mockAuthUser', JSON.stringify(user));
+      }
+    },
+    async logout() {
       set(null);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('mockAuthUser');
+        localStorage.removeItem('mockAuthSessionId');
+      }
+      await mockLogout();
     },
   };
 }
 
-export const authStore = createAuthStore();
+export const authStore: AuthStore = createAuthStore();
