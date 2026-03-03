@@ -2,12 +2,14 @@
   import { onMount } from 'svelte';
   import { getTodayRevenue, getActiveBookingCount, getAvailablePaddleCount, getTotalUserCount, getRecentBookings } from '$lib/data/admin';
 
+  /** @type {{ todayRevenue: number; activeBookingCount: number; availablePaddleCount: number; totalUserCount: number }} */
   let metrics = {
     todayRevenue: 0,
     activeBookingCount: 0,
     availablePaddleCount: 0,
     totalUserCount: 0
   };
+  /** @type {{ id: string; paddle_name: string; user_name: string; start_date: string; status: string; total_price: number }[]} */
   let recentBookings = [];
 
   onMount(() => {
@@ -20,6 +22,10 @@
     recentBookings = getRecentBookings(5);
   });
 
+  /**
+   * @param {string} dateStr
+   * @returns {string}
+   */
   function formatDate(dateStr) {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
