@@ -1,10 +1,18 @@
 <script>
 	import { page } from '$app/stores';
-	import { getPaddleById, getReviewsForPaddle, getRelatedPaddles } from '$lib/data/paddles';
+	import { getPaddleById, getRelatedPaddles } from '$lib/data/paddles';
+	import { getReviewsForPaddle, getAverageRating, getReviewCount, canReviewBooking, formatReviewDate } from '$lib/data/reviews';
+	import { CURRENT_USER, getPastBookings } from '$lib/data/user';
+	import ReviewModal from '$lib/components/ReviewModal.svelte';
 
 	let paddle = undefined;
 	let reviews = [];
 	let relatedPaddles = [];
+	let averageRating = 0;
+	let reviewCount = 0;
+
+	let showReviewModal = false;
+	let reviewableBooking = null;
 
 	// Load paddle data
 	$: {
@@ -12,7 +20,15 @@
 		paddle = getPaddleById(id);
 		if (paddle) {
 			reviews = getReviewsForPaddle(id);
+			averageRating = getAverageRating(id);
+			reviewCount = getReviewCount(id);
 			relatedPaddles = getRelatedPaddles(id, 4);
+
+			// Check if current user has a reviewable booking for this paddle
+			const pastBookings = getPastBookings(CURRENT_USER.id);
+			reviewableBooking = pastBookings.find(
+				b => b.paddle_id === id && canReviewBooking(b, CURRENT_USER.id)
+			);
 		}
 	}
 
@@ -51,6 +67,28 @@
 	}
 
 	let totalDays = 1;
+
+	// Handle review submission
+	function handleReviewSubmit(_event) {
+		// Reviews are already added to MOCK_REVIEWS in the modal
+		// Just reload the reviews display
+		if (paddle) {
+			reviews = getReviewsForPaddle(paddle.id);
+			averageRating = getAverageRating(paddle.id);
+			reviewCount = getReviewCount(paddle.id);
+
+			// Check if still reviewable (shouldn't be after submission)
+			const pastBookings = getPastBookings(CURRENT_USER.id);
+			reviewableBooking = pastBookings.find(
+				b => b.paddle_id === paddle.id && canReviewBooking(b, CURRENT_USER.id)
+			);
+		}
+		showReviewModal = false;
+	}
+
+	function openReviewModal() {
+		showReviewModal = true;
+	}
 </script>
 
 {#if paddle}
@@ -250,59 +288,96 @@
 			<!-- Reviews Section -->
 			<div class="card bg-base-100 shadow-lg mb-12">
 				<div class="card-body">
-					<h2 class="card-title text-2xl mb-6">Reviews & Ratings</h2>
-
-					<!-- Overall Rating -->
-					<div class="bg-base-200 p-6 rounded-lg mb-8">
-						<div class="flex items-center gap-4">
-							<div>
-								<p class="text-5xl font-bold text-primary">{paddle.avg_rating}</p>
-								<p class="text-sm text-base-content/70">out of 5 stars</p>
-							</div>
-							<div class="flex-1">
-								<div class="flex gap-1 mb-2" aria-label="{paddle.avg_rating} out of 5 stars">
-									{#each Array(5) as _, i}
-										<span
-											class={`text-2xl ${
-												i < Math.floor(paddle.avg_rating)
-													? 'text-warning'
-													: i < Math.ceil(paddle.avg_rating)
-														? 'text-warning/50'
-														: 'text-base-300'
-											}`}
-										>
-											★
-										</span>
-									{/each}
-								</div>
-								<p class="text-sm text-base-content/70">Based on {paddle.total_reviews} reviews</p>
-							</div>
-						</div>
+					<div class="flex items-center justify-between mb-6">
+						<h2 class="card-title text-2xl">Reviews & Ratings</h2>
+						{#if reviewableBooking}
+							<button
+								class="btn btn-primary btn-sm"
+								on:click={openReviewModal}
+								aria-label="Leave a review for this paddle"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="1.5"
+									stroke="currentColor"
+									class="w-4 h-4"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M12 4.5v15m7.5-7.5h-15"
+									/>
+								</svg>
+								Leave Review
+							</button>
+						{/if}
 					</div>
 
-					<!-- Individual Reviews -->
+					<!-- Overall Rating Section -->
+					{#if reviewCount > 0}
+						<div class="bg-base-200 p-6 rounded-lg mb-8">
+							<div class="flex items-center gap-6">
+								<div>
+									<p class="text-5xl font-bold text-primary">{averageRating}</p>
+									<p class="text-sm text-base-content/70">out of 5 stars</p>
+								</div>
+								<div class="flex-1">
+									<div class="flex gap-1 mb-2" aria-label="{averageRating} out of 5 stars rating">
+										{#each Array(5) as _, i}
+											<span
+												class={`text-3xl ${
+													i < Math.floor(averageRating)
+														? 'text-warning'
+														: i < Math.ceil(averageRating)
+															? 'text-warning/50'
+															: 'text-base-300'
+												}`}
+											>
+												★
+											</span>
+										{/each}
+									</div>
+									<p class="text-sm text-base-content/70">
+										Based on {reviewCount} review{reviewCount !== 1 ? 's' : ''}
+									</p>
+								</div>
+							</div>
+						</div>
+					{/if}
+
+					<!-- Individual Reviews List -->
 					<div class="space-y-4">
 						{#each reviews as review (review.id)}
-							<div class="border-l-4 border-primary pl-4 py-2">
+							<div class="border-l-4 border-primary pl-4 py-3">
 								<!-- Review Header -->
 								<div class="flex items-start justify-between mb-2">
 									<div>
 										<p class="font-bold text-lg">{review.reviewer_name}</p>
-										<p class="text-xs text-base-content/60">{review.created_at}</p>
+										<p class="text-xs text-base-content/60">
+											{formatReviewDate(new Date(review.created_at))}
+										</p>
 									</div>
 									<div class="flex gap-0.5" aria-label="{review.rating} out of 5 stars">
 										{#each Array(5) as _, i}
-											<span class={i < review.rating ? 'text-warning' : 'text-base-300'}>★</span>
+											<span class={`text-lg ${i < review.rating ? 'text-warning' : 'text-base-300'}`}>
+												★
+											</span>
 										{/each}
 									</div>
 								</div>
+								<!-- Review Rating Text -->
+								<p class="text-xs text-base-content/60 mb-2">
+									{review.rating} out of 5 star{review.rating !== 1 ? 's' : ''}
+								</p>
 								<!-- Review Comment -->
-								<p class="text-base-content/80">{review.comment}</p>
+								<p class="text-base-content/80 leading-relaxed">{review.comment}</p>
 							</div>
 						{/each}
 					</div>
 
-					{#if reviews.length === 0}
+					{#if reviewCount === 0}
 						<div class="alert alert-info">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -382,4 +457,18 @@
 			<a href="/paddles" class="btn btn-primary">Back to Paddles</a>
 		</div>
 	</div>
+{/if}
+
+<!-- Review Modal -->
+{#if paddle}
+	<ReviewModal
+		isOpen={showReviewModal}
+		bookingId={reviewableBooking?.id || ''}
+		paddleId={paddle.id}
+		reviewerId={CURRENT_USER.id}
+		reviewerName={CURRENT_USER.name}
+		paddleName={paddle.name}
+		on:submit={handleReviewSubmit}
+		on:close={() => (showReviewModal = false)}
+	/>
 {/if}

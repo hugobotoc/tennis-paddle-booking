@@ -3,6 +3,8 @@
   import { authStore } from '$lib/stores/auth';
   import { onMount } from 'svelte';
   import { MOCK_PADDLES } from '$lib/data/paddles';
+  import { canReviewBooking, hasReviewForBooking } from '$lib/data/reviews';
+  import ReviewModal from '$lib/components/ReviewModal.svelte';
   import {
     getActiveBookings,
     getPastBookings,
@@ -20,6 +22,8 @@
   let showCancelDialog = false;
   let bookingToCancel = null;
   let cancelError = '';
+  let showReviewModal = false;
+  let reviewBooking = null;
 
   onMount(() => {
     // Client-side auth check
@@ -82,6 +86,26 @@
   function formatDate(dateStr) {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function openReviewModal(booking) {
+    if (canReviewBooking(booking, CURRENT_USER.id)) {
+      reviewBooking = booking;
+      showReviewModal = true;
+    }
+  }
+
+  function handleReviewSubmit(_event) {
+    // Review has been added, just close the modal and refresh the list
+    showReviewModal = false;
+    reviewBooking = null;
+    // Reload past bookings to reflect the new state
+    pastBookings = getPastBookings(CURRENT_USER.id);
+  }
+
+  function closeReviewModal() {
+    showReviewModal = false;
+    reviewBooking = null;
   }
 </script>
 
@@ -365,12 +389,37 @@
                         >
                           View Paddle
                         </a>
-                        <button
-                          class="btn btn-sm btn-outline btn-warning w-full"
-                          aria-label="Leave review for {paddle?.name || 'this paddle'}"
-                        >
-                          Leave Review
-                        </button>
+                        {#if canReviewBooking(booking, CURRENT_USER.id)}
+                          <button
+                            class="btn btn-sm btn-outline btn-warning w-full"
+                            on:click={() => openReviewModal(booking)}
+                            aria-label="Leave review for {paddle?.name || 'this paddle'}"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke-width="1.5"
+                              stroke="currentColor"
+                              class="w-4 h-4"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 4.5v15m7.5-7.5h-15"
+                              />
+                            </svg>
+                            Leave Review
+                          </button>
+                        {:else if hasReviewForBooking(booking.id)}
+                          <button
+                            class="btn btn-sm btn-disabled w-full"
+                            disabled
+                            aria-label="Already reviewed"
+                          >
+                            ✓ Reviewed
+                          </button>
+                        {/if}
                       </div>
                     </div>
                   </div>
@@ -535,6 +584,20 @@
           </div>
         </div>
       </div>
+    {/if}
+
+    <!-- Review Modal -->
+    {#if reviewBooking}
+      <ReviewModal
+        isOpen={showReviewModal}
+        bookingId={reviewBooking.id}
+        paddleId={reviewBooking.paddle_id}
+        reviewerId={CURRENT_USER.id}
+        reviewerName={CURRENT_USER.name}
+        paddleName={getPaddleInfo(reviewBooking.paddle_id)?.name || 'Paddle'}
+        on:submit={handleReviewSubmit}
+        on:close={closeReviewModal}
+      />
     {/if}
   </div>
 {/if}
