@@ -194,7 +194,7 @@ INSERT INTO paddles (id, owner_id, name, description, brand, condition, hourly_r
     CURRENT_TIMESTAMP
   ),
   (
-    '550e8400-e29b-41d4-a716-446655440012',
+    '550e8400-e29b-41d4-a716-446655440014',
     '550e8400-e29b-41d4-a716-446655440001',
     'Head Graphene',
     'Advanced graphene composite paddle. Minor cosmetic damage, fully functional.',
