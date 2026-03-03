@@ -36,23 +36,36 @@ A web-based booking system for tennis paddle rentals. Users can register, browse
 #### **1.2 Database Schema & Supabase Setup**
 - **Status:** TODO
 - **Priority:** P0 (Critical)
-- **Description:** Define and create PostgreSQL schema in Supabase for all entities.
+- **Description:** Create PostgreSQL schema SQL file for Supabase (coordinator will execute in SQLEditor when account is ready).
 - **User Requirements:**
   - System must track paddle inventory, bookings, and users
   - Support for multiple paddle types/brands
   - Booking availability checking
 - **Feature Requirements:**
-  - Tables: `users`, `paddles`, `bookings`, `reviews`, `paddle_availability`
-  - Proper indexes on `user_id`, `paddle_id`, `booking_dates`
-  - Foreign key relationships
-  - Row-level security (RLS) policies for user data isolation
-  - Audit columns (created_at, updated_at, created_by)
-- **Tech Stack:** Supabase (PostgreSQL)
+  - **SQL Migration File** (`src/lib/db/schema.sql`):
+    - CREATE TABLE statements: `users`, `paddles`, `bookings`, `reviews`, `paddle_availability`
+    - Proper indexes on `user_id`, `paddle_id`, `booking_dates`
+    - Foreign key relationships with CASCADE rules
+    - Row-level security (RLS) policy templates (commented, ready to enable)
+    - Audit columns (created_at, updated_at, created_by)
+    - Insert 2-3 seed paddle records for testing
+  - **Placeholder Config** (`src/lib/config.ts`):
+    - Export Supabase URL, anon key, service role key as empty strings or env vars
+    - Environment variables in `.env.example` (no real values)
+  - **Frontend Auth Placeholder** (`src/lib/auth.ts`):
+    - Mock auth functions that return dummy user data
+    - Console logs instead of actual Supabase calls
+    - Ready to swap for real Supabase when account exists
+- **Tech Stack:** SQL + TypeScript stubs
 - **Acceptance Criteria:**
-  - All tables created with correct relationships
-  - RLS enabled and tested
-  - Seed data (2-3 test paddles) inserted
-  - No N+1 query patterns in application code
+  - `schema.sql` is valid PostgreSQL (syntax-checked)
+  - Can be copy-pasted into Supabase SQLEditor without errors
+  - All tables, indexes, FKs defined
+  - RLS policies included (commented, with enabling instructions)
+  - 2-3 seed paddle records included
+  - `.env.example` has placeholders for Supabase keys
+  - Frontend auth is mocked (no actual Supabase calls until account exists)
+  - Documentation in `schema.sql` explains what coordinator needs to do
 
 ---
 
