@@ -3,7 +3,7 @@
  *
  * This module is kept for backward compatibility but is deprecated.
  * Server-side auth checks with localStorage don't work on SSR.
- * 
+ *
  * Instead, use client-side checks in your page components:
  * ```svelte
  * <script lang="ts">

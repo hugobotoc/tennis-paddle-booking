@@ -2,7 +2,9 @@
   import { page } from '$app/stores';
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-error to-error-focus flex items-center justify-center p-4">
+<div
+  class="min-h-screen bg-gradient-to-br from-error to-error-focus flex items-center justify-center p-4"
+>
   <div class="w-full max-w-md">
     <div class="card bg-base-100 shadow-xl">
       <div class="card-body">
