@@ -1,21 +1,87 @@
-<script lang="ts">
+<script>
   import { goto } from '$app/navigation';
   import { authStore } from '$lib/stores/auth';
   import { onMount } from 'svelte';
+  import { MOCK_PADDLES } from '$lib/data/paddles';
+  import {
+    getActiveBookings,
+    getPastBookings,
+    getCancelledBookings,
+    cancelBooking,
+    calculateBookingDays,
+    CURRENT_USER
+  } from '$lib/data/user';
 
   let isLoading = true;
+  let activeTab = 'active';
+  let activeBookings = [];
+  let pastBookings = [];
+  let cancelledBookings = [];
+  let showCancelDialog = false;
+  let bookingToCancel = null;
+  let cancelError = '';
 
   onMount(() => {
-    // Client-side auth check (only runs in browser, not on SSR)
+    // Client-side auth check
     if (!$authStore) {
       goto('/login');
     }
+
+    // Load bookings for current user
+    activeBookings = getActiveBookings(CURRENT_USER.id);
+    pastBookings = getPastBookings(CURRENT_USER.id);
+    cancelledBookings = getCancelledBookings(CURRENT_USER.id);
+
     isLoading = false;
   });
 
   async function handleLogout() {
     await authStore.logout();
     await goto('/login');
+  }
+
+  function getPaddleInfo(paddleId) {
+    return MOCK_PADDLES.find(p => p.id === paddleId);
+  }
+
+  function handleCancelClick(booking) {
+    bookingToCancel = booking;
+    cancelError = '';
+    showCancelDialog = true;
+  }
+
+  function confirmCancel() {
+    if (!bookingToCancel) return;
+
+    const result = cancelBooking(bookingToCancel.id, CURRENT_USER.id);
+
+    if (result.success) {
+      // Move booking to cancelled tab
+      activeBookings = getActiveBookings(CURRENT_USER.id);
+      pastBookings = getPastBookings(CURRENT_USER.id);
+      cancelledBookings = getCancelledBookings(CURRENT_USER.id);
+      showCancelDialog = false;
+      bookingToCancel = null;
+      cancelError = '';
+    } else {
+      cancelError = result.message;
+    }
+  }
+
+  function closeCancelDialog() {
+    showCancelDialog = false;
+    bookingToCancel = null;
+    cancelError = '';
+  }
+
+  function getFormattedAddress(address) {
+    if (!address) return 'N/A';
+    return `${address.street_address}, ${address.city}, ${address.state} ${address.zip}`;
+  }
+
+  function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 </script>
 
@@ -56,7 +122,7 @@
               <div>{$authStore?.email || 'email'}</div>
             </li>
             <li>
-              <a href="/profile">Profile</a>
+              <a href="/paddles">Browse Paddles</a>
             </li>
             <li>
               <button on:click={handleLogout}>Logout</button>
@@ -71,60 +137,405 @@
       <!-- Welcome Section -->
       <div class="card bg-gradient-to-r from-primary to-primary-focus shadow-xl mb-8">
         <div class="card-body text-white">
-          <h1 class="card-title text-3xl md:text-4xl">
-            Welcome, {$authStore?.name || 'User'}! 👋
-          </h1>
-          <p class="opacity-90">You are logged in as {$authStore?.email}</p>
+          <h1 class="card-title text-3xl md:text-4xl">My Bookings</h1>
+          <p class="opacity-90">Welcome back, {$authStore?.name || 'User'}! 👋</p>
         </div>
       </div>
 
-      <!-- Quick Actions -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        <div class="card bg-base-200 shadow-md">
-          <div class="card-body">
-            <h2 class="card-title text-lg">Browse Paddles</h2>
-            <p class="opacity-75">Coming soon: Browse available tennis paddles for rental</p>
-            <div class="card-actions justify-start">
-              <button class="btn btn-primary btn-sm" disabled>Browse</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card bg-base-200 shadow-md">
-          <div class="card-body">
-            <h2 class="card-title text-lg">My Bookings</h2>
-            <p class="opacity-75">Coming soon: View your rental bookings and history</p>
-            <div class="card-actions justify-start">
-              <button class="btn btn-primary btn-sm" disabled>View Bookings</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card bg-base-200 shadow-md">
-          <div class="card-body">
-            <h2 class="card-title text-lg">Account Settings</h2>
-            <p class="opacity-75">Coming soon: Manage your profile and preferences</p>
-            <div class="card-actions justify-start">
-              <button class="btn btn-primary btn-sm" disabled>Settings</button>
-            </div>
-          </div>
-        </div>
+      <!-- Tabs -->
+      <div class="tabs tabs-bordered mb-6" role="tablist">
+        <button
+          role="tab"
+          aria-selected={activeTab === 'active'}
+          aria-label="Active Bookings tab"
+          class="tab {activeTab === 'active' ? 'tab-active' : ''}"
+          on:click={() => (activeTab = 'active')}
+        >
+          Active Bookings ({activeBookings.length})
+        </button>
+        <button
+          role="tab"
+          aria-selected={activeTab === 'past'}
+          aria-label="Past Bookings tab"
+          class="tab {activeTab === 'past' ? 'tab-active' : ''}"
+          on:click={() => (activeTab = 'past')}
+        >
+          Past Bookings ({pastBookings.length})
+        </button>
+        <button
+          role="tab"
+          aria-selected={activeTab === 'cancelled'}
+          aria-label="Cancelled Bookings tab"
+          class="tab {activeTab === 'cancelled' ? 'tab-active' : ''}"
+          on:click={() => (activeTab = 'cancelled')}
+        >
+          Cancelled Bookings ({cancelledBookings.length})
+        </button>
       </div>
 
-      <!-- Placeholder Section -->
-      <div class="card bg-base-200 shadow-xl">
-        <div class="card-body">
-          <h2 class="card-title">Getting Started</h2>
-          <p>
-            This is your dashboard! Here you'll be able to browse paddles, manage bookings, and view
-            your rental history. More features coming soon!
-          </p>
-          <div class="card-actions justify-start">
-            <button class="btn btn-outline btn-primary" on:click={handleLogout}> Logout </button>
-          </div>
+      <!-- Tab Content: Active Bookings -->
+      {#if activeTab === 'active'}
+        <div class="space-y-4">
+          {#if activeBookings.length === 0}
+            <div class="card bg-base-200 shadow-lg">
+              <div class="card-body text-center py-12">
+                <h2 class="card-title justify-center">No Active Bookings</h2>
+                <p class="opacity-75">You don't have any active bookings right now.</p>
+                <div class="card-actions justify-center">
+                  <a href="/paddles" class="btn btn-primary">Start Exploring Paddles</a>
+                </div>
+              </div>
+            </div>
+          {:else}
+            {#each activeBookings as booking (booking.id)}
+              {@const paddle = getPaddleInfo(booking.paddle_id)}
+              {@const daysCount = calculateBookingDays(booking.start_date, booking.end_date)}
+              <div class="card bg-base-200 shadow-lg hover:shadow-xl transition-shadow">
+                <div class="card-body">
+                  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Paddle Image & Name -->
+                    <div class="flex flex-col items-start gap-3">
+                      {#if paddle}
+                        <img
+                          src={paddle.image_url}
+                          alt={paddle.name}
+                          class="w-full h-40 object-cover rounded-lg"
+                        />
+                        <div>
+                          <h3 class="card-title text-lg">{paddle.name}</h3>
+                          <p class="text-sm opacity-75">
+                            {paddle.brand} {paddle.model}
+                          </p>
+                        </div>
+                      {:else}
+                        <div class="w-full h-40 bg-base-300 rounded-lg flex items-center justify-center">
+                          <span class="opacity-50">No image</span>
+                        </div>
+                      {/if}
+                    </div>
+
+                    <!-- Booking Details -->
+                    <div class="md:col-span-2 flex flex-col gap-3">
+                      <!-- Dates -->
+                      <div>
+                        <p class="text-sm opacity-75 mb-1">Booking Dates</p>
+                        <p class="font-semibold">
+                          {formatDate(booking.start_date)} - {formatDate(booking.end_date)}
+                        </p>
+                      </div>
+
+                      <!-- Status Badge -->
+                      <div>
+                        <p class="text-sm opacity-75 mb-1">Status</p>
+                        <div class="badge badge-lg badge-primary capitalize">
+                          {booking.status}
+                        </div>
+                      </div>
+
+                      <!-- Price Breakdown -->
+                      <div>
+                        <p class="text-sm opacity-75 mb-1">Price Breakdown</p>
+                        <p class="text-sm">
+                          ${booking.daily_rate} × {daysCount} day{daysCount > 1 ? 's' : ''} = ${(booking.daily_rate * daysCount).toFixed(2)}
+                        </p>
+                      </div>
+
+                      <!-- Delivery Address -->
+                      <div>
+                        <p class="text-sm opacity-75 mb-1">Delivery Address</p>
+                        <p class="text-sm truncate">{getFormattedAddress(booking.delivery_address)}</p>
+                      </div>
+                    </div>
+
+                    <!-- Total Price & Actions -->
+                    <div class="flex flex-col justify-between items-end gap-2">
+                      <div class="text-right">
+                        <p class="text-sm opacity-75">Total Cost</p>
+                        <p class="text-2xl font-bold text-primary">${booking.total_price.toFixed(2)}</p>
+                      </div>
+
+                      <div class="flex flex-col w-full gap-2">
+                        <a
+                          href={`/paddles/${booking.paddle_id}`}
+                          class="btn btn-sm btn-outline btn-primary w-full"
+                          aria-label="View paddle details for {paddle?.name || 'this paddle'}"
+                        >
+                          View Paddle
+                        </a>
+                        <button
+                          class="btn btn-sm btn-outline btn-error w-full"
+                          on:click={() => handleCancelClick(booking)}
+                          aria-label="Cancel booking for {paddle?.name || 'this paddle'}"
+                        >
+                          Cancel Booking
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {/each}
+          {/if}
         </div>
-      </div>
+      {/if}
+
+      <!-- Tab Content: Past Bookings -->
+      {#if activeTab === 'past'}
+        <div class="space-y-4">
+          {#if pastBookings.length === 0}
+            <div class="card bg-base-200 shadow-lg">
+              <div class="card-body text-center py-12">
+                <h2 class="card-title justify-center">No Past Bookings</h2>
+                <p class="opacity-75">You don't have any completed bookings yet.</p>
+              </div>
+            </div>
+          {:else}
+            {#each pastBookings as booking (booking.id)}
+              {@const paddle = getPaddleInfo(booking.paddle_id)}
+              {@const daysCount = calculateBookingDays(booking.start_date, booking.end_date)}
+              <div class="card bg-base-200 shadow-lg hover:shadow-xl transition-shadow">
+                <div class="card-body">
+                  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Paddle Image & Name -->
+                    <div class="flex flex-col items-start gap-3">
+                      {#if paddle}
+                        <img
+                          src={paddle.image_url}
+                          alt={paddle.name}
+                          class="w-full h-40 object-cover rounded-lg"
+                        />
+                        <div>
+                          <h3 class="card-title text-lg">{paddle.name}</h3>
+                          <p class="text-sm opacity-75">
+                            {paddle.brand} {paddle.model}
+                          </p>
+                        </div>
+                      {:else}
+                        <div class="w-full h-40 bg-base-300 rounded-lg flex items-center justify-center">
+                          <span class="opacity-50">No image</span>
+                        </div>
+                      {/if}
+                    </div>
+
+                    <!-- Booking Details -->
+                    <div class="md:col-span-2 flex flex-col gap-3">
+                      <!-- Dates -->
+                      <div>
+                        <p class="text-sm opacity-75 mb-1">Booking Dates</p>
+                        <p class="font-semibold">
+                          {formatDate(booking.start_date)} - {formatDate(booking.end_date)}
+                        </p>
+                      </div>
+
+                      <!-- Status Badge -->
+                      <div>
+                        <p class="text-sm opacity-75 mb-1">Status</p>
+                        <div class="badge badge-lg badge-success capitalize">
+                          {booking.status}
+                        </div>
+                      </div>
+
+                      <!-- Price Breakdown -->
+                      <div>
+                        <p class="text-sm opacity-75 mb-1">Price Breakdown</p>
+                        <p class="text-sm">
+                          ${booking.daily_rate} × {daysCount} day{daysCount > 1 ? 's' : ''} = ${(booking.daily_rate * daysCount).toFixed(2)}
+                        </p>
+                      </div>
+
+                      <!-- Delivery Address -->
+                      <div>
+                        <p class="text-sm opacity-75 mb-1">Delivery Address</p>
+                        <p class="text-sm truncate">{getFormattedAddress(booking.delivery_address)}</p>
+                      </div>
+                    </div>
+
+                    <!-- Total Price & Actions -->
+                    <div class="flex flex-col justify-between items-end gap-2">
+                      <div class="text-right">
+                        <p class="text-sm opacity-75">Total Cost</p>
+                        <p class="text-2xl font-bold text-success">${booking.total_price.toFixed(2)}</p>
+                      </div>
+
+                      <div class="flex flex-col w-full gap-2">
+                        <a
+                          href={`/paddles/${booking.paddle_id}`}
+                          class="btn btn-sm btn-outline btn-primary w-full"
+                          aria-label="View paddle details for {paddle?.name || 'this paddle'}"
+                        >
+                          View Paddle
+                        </a>
+                        <button
+                          class="btn btn-sm btn-outline btn-warning w-full"
+                          aria-label="Leave review for {paddle?.name || 'this paddle'}"
+                        >
+                          Leave Review
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {/each}
+          {/if}
+        </div>
+      {/if}
+
+      <!-- Tab Content: Cancelled Bookings -->
+      {#if activeTab === 'cancelled'}
+        <div class="space-y-4">
+          {#if cancelledBookings.length === 0}
+            <div class="card bg-base-200 shadow-lg">
+              <div class="card-body text-center py-12">
+                <h2 class="card-title justify-center">No Cancelled Bookings</h2>
+                <p class="opacity-75">You don't have any cancelled bookings.</p>
+              </div>
+            </div>
+          {:else}
+            {#each cancelledBookings as booking (booking.id)}
+              {@const paddle = getPaddleInfo(booking.paddle_id)}
+              {@const daysCount = calculateBookingDays(booking.start_date, booking.end_date)}
+              <div class="card bg-base-200 shadow-lg hover:shadow-xl transition-shadow opacity-75">
+                <div class="card-body">
+                  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Paddle Image & Name -->
+                    <div class="flex flex-col items-start gap-3">
+                      {#if paddle}
+                        <img
+                          src={paddle.image_url}
+                          alt={paddle.name}
+                          class="w-full h-40 object-cover rounded-lg"
+                        />
+                        <div>
+                          <h3 class="card-title text-lg">{paddle.name}</h3>
+                          <p class="text-sm opacity-75">
+                            {paddle.brand} {paddle.model}
+                          </p>
+                        </div>
+                      {:else}
+                        <div class="w-full h-40 bg-base-300 rounded-lg flex items-center justify-center">
+                          <span class="opacity-50">No image</span>
+                        </div>
+                      {/if}
+                    </div>
+
+                    <!-- Booking Details -->
+                    <div class="md:col-span-2 flex flex-col gap-3">
+                      <!-- Dates -->
+                      <div>
+                        <p class="text-sm opacity-75 mb-1">Booking Dates</p>
+                        <p class="font-semibold">
+                          {formatDate(booking.start_date)} - {formatDate(booking.end_date)}
+                        </p>
+                      </div>
+
+                      <!-- Status Badge -->
+                      <div>
+                        <p class="text-sm opacity-75 mb-1">Status</p>
+                        <div class="badge badge-lg badge-error capitalize">
+                          {booking.status}
+                        </div>
+                      </div>
+
+                      <!-- Price Breakdown -->
+                      <div>
+                        <p class="text-sm opacity-75 mb-1">Price Breakdown</p>
+                        <p class="text-sm">
+                          ${booking.daily_rate} × {daysCount} day{daysCount > 1 ? 's' : ''} = ${(booking.daily_rate * daysCount).toFixed(2)}
+                        </p>
+                      </div>
+
+                      <!-- Delivery Address -->
+                      <div>
+                        <p class="text-sm opacity-75 mb-1">Delivery Address</p>
+                        <p class="text-sm truncate">{getFormattedAddress(booking.delivery_address)}</p>
+                      </div>
+                    </div>
+
+                    <!-- Total Price & Actions -->
+                    <div class="flex flex-col justify-between items-end gap-2">
+                      <div class="text-right">
+                        <p class="text-sm opacity-75">Total Cost</p>
+                        <p class="text-2xl font-bold">${booking.total_price.toFixed(2)}</p>
+                      </div>
+
+                      <div class="flex flex-col w-full gap-2">
+                        <a
+                          href={`/paddles/${booking.paddle_id}`}
+                          class="btn btn-sm btn-outline btn-primary w-full"
+                          aria-label="View paddle details for {paddle?.name || 'this paddle'}"
+                        >
+                          View Paddle
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {/each}
+          {/if}
+        </div>
+      {/if}
     </div>
+
+    <!-- Cancel Booking Confirmation Dialog -->
+    {#if showCancelDialog && bookingToCancel}
+      <button
+        class="fixed inset-0 bg-black bg-opacity-50 z-40"
+        on:click={closeCancelDialog}
+        on:keydown={(e) => e.key === 'Escape' && closeCancelDialog()}
+        aria-label="Close dialog by clicking background"
+      />
+      <div
+        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-base-100 rounded-lg shadow-2xl z-50 w-96"
+        role="alertdialog"
+        aria-label="Cancel booking confirmation dialog"
+        aria-describedby="cancel-dialog-description"
+      >
+        <div class="p-6">
+          <h3 class="font-bold text-lg mb-4">Cancel Booking?</h3>
+          <p id="cancel-dialog-description" class="mb-4 opacity-75">
+            Are you sure you want to cancel this booking? This action cannot be undone.
+          </p>
+
+          {#if cancelError}
+            <div class="alert alert-error mb-4" role="status" aria-live="polite">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="stroke-current shrink-0 h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2m6-6l2 2m0 0l2 2m-2-2l-2-2m2 2l2-2"
+                />
+              </svg>
+              <span>{cancelError}</span>
+            </div>
+          {/if}
+
+          <div class="flex gap-3 justify-end">
+            <button
+              class="btn btn-ghost"
+              on:click={closeCancelDialog}
+              aria-label="Close dialog"
+            >
+              Keep Booking
+            </button>
+            <button
+              class="btn btn-error"
+              on:click={confirmCancel}
+              aria-label="Confirm cancellation"
+            >
+              Yes, Cancel Booking
+            </button>
+          </div>
+        </div>
+      </div>
+    {/if}
   </div>
 {/if}
 
@@ -136,7 +547,7 @@
     }
 
     :global(.card-title) {
-      font-size: 1.25rem;
+      font-size: 1.125rem;
     }
   }
 </style>
