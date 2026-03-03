@@ -1,6 +1,7 @@
 # Tennis Paddle Booking System - Specifications
 
 ## Product Overview
+
 A web-based booking system for tennis paddle rentals. Users can register, browse available paddles, check availability, make bookings, manage their reservations, and leave reviews. Admins manage inventory, pricing, and business analytics.
 
 ---
@@ -10,6 +11,7 @@ A web-based booking system for tennis paddle rentals. Users can register, browse
 ### Phase 1: Core Infrastructure (Foundation)
 
 #### **1.1 Project Setup & Authentication**
+
 - **Status:** TODO
 - **Priority:** P0 (Critical)
 - **Description:** Initialize SvelteKit project with TypeScript, TailwindCSS, Supabase, and Auth.js setup.
@@ -34,6 +36,7 @@ A web-based booking system for tennis paddle rentals. Users can register, browse
 ---
 
 #### **1.2 Database Schema & Supabase Setup**
+
 - **Status:** TODO
 - **Priority:** P0 (Critical)
 - **Description:** Create PostgreSQL schema SQL file for Supabase (coordinator will execute in SQLEditor when account is ready).
@@ -72,6 +75,7 @@ A web-based booking system for tennis paddle rentals. Users can register, browse
 ### Phase 2: User-Facing Features
 
 #### **2.1 Paddle Inventory Browse**
+
 - **Status:** TODO
 - **Priority:** P1 (High)
 - **Description:** Display list of available paddles with details (brand, model, price, images, ratings).
@@ -98,6 +102,7 @@ A web-based booking system for tennis paddle rentals. Users can register, browse
 ---
 
 #### **2.2 Paddle Detail Page**
+
 - **Status:** TODO
 - **Priority:** P1 (High)
 - **Description:** Single paddle detail view with full specs, images, reviews, and booking form.
@@ -123,6 +128,7 @@ A web-based booking system for tennis paddle rentals. Users can register, browse
 ---
 
 #### **2.3 Booking Checkout Flow**
+
 - **Status:** TODO
 - **Priority:** P1 (High)
 - **Description:** Multi-step checkout: select dates, enter delivery details, confirm, process payment.
@@ -150,6 +156,7 @@ A web-based booking system for tennis paddle rentals. Users can register, browse
 ---
 
 #### **2.4 User Dashboard & Booking History**
+
 - **Status:** TODO
 - **Priority:** P2 (Medium)
 - **Description:** User dashboard showing active bookings, past bookings, and ability to cancel/modify.
@@ -175,6 +182,7 @@ A web-based booking system for tennis paddle rentals. Users can register, browse
 ---
 
 #### **2.5 Review & Rating System**
+
 - **Status:** TODO
 - **Priority:** P2 (Medium)
 - **Description:** Allow users to leave 1-5 star ratings and text reviews on rented paddles.
@@ -203,6 +211,7 @@ A web-based booking system for tennis paddle rentals. Users can register, browse
 ### Phase 3: Admin & Business Features
 
 #### **3.1 Admin Dashboard**
+
 - **Status:** TODO
 - **Priority:** P3 (Medium)
 - **Description:** Admin-only dashboard with overview of bookings, revenue, and paddle stats.
@@ -226,6 +235,7 @@ A web-based booking system for tennis paddle rentals. Users can register, browse
 ---
 
 #### **3.2 Paddle Inventory Management**
+
 - **Status:** TODO
 - **Priority:** P3 (Medium)
 - **Description:** CRUD operations for paddles (create, read, update, delete) with image uploads.
@@ -252,6 +262,7 @@ A web-based booking system for tennis paddle rentals. Users can register, browse
 ---
 
 #### **3.3 Booking Management**
+
 - **Status:** TODO
 - **Priority:** P3 (Medium)
 - **Description:** Admin view of all bookings with ability to update status, view details, and manage issues.
@@ -277,6 +288,7 @@ A web-based booking system for tennis paddle rentals. Users can register, browse
 ---
 
 #### **3.4 Analytics & Reporting**
+
 - **Status:** TODO
 - **Priority:** P4 (Low)
 - **Description:** Revenue, occupancy, and paddle performance reports.

@@ -5,6 +5,7 @@ A modern web-based booking system for tennis paddle rentals, built with SvelteKi
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js 22+
 - npm
 - Supabase account (free tier works)
