@@ -2,6 +2,9 @@ import adapter from '@sveltejs/adapter-auto';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
+  compilerOptions: {
+    dev: process.env.NODE_ENV === 'development'
+  },
   kit: {
     adapter: adapter(),
   },
