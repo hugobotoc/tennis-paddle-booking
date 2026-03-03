@@ -8,7 +8,7 @@ import type { Booking } from './bookings';
 export interface Review {
   id: string;
   booking_id: string;
-  paddle_id: string;
+  court_id: string;
   reviewer_id: string;
   reviewer_name: string;
   rating: number;
@@ -23,7 +23,7 @@ export const MOCK_REVIEWS: Review[] = [
   {
     id: 'review-1',
     booking_id: 'booking-3',
-    paddle_id: '550e8400-e29b-41d4-a716-446655440002',
+    court_id: '550e8400-e29b-41d4-a716-446655440002',
     reviewer_id: 'user-456',
     reviewer_name: 'Jane Smith',
     rating: 5,
@@ -33,7 +33,7 @@ export const MOCK_REVIEWS: Review[] = [
   {
     id: 'review-2',
     booking_id: 'booking-4',
-    paddle_id: '550e8400-e29b-41d4-a716-446655440004',
+    court_id: '550e8400-e29b-41d4-a716-446655440004',
     reviewer_id: 'user-789',
     reviewer_name: 'Mike Johnson',
     rating: 4,
@@ -43,7 +43,7 @@ export const MOCK_REVIEWS: Review[] = [
   {
     id: 'review-3',
     booking_id: 'booking-2',
-    paddle_id: '550e8400-e29b-41d4-a716-446655440003',
+    court_id: '550e8400-e29b-41d4-a716-446655440003',
     reviewer_id: 'user-321',
     reviewer_name: 'Sarah Williams',
     rating: 5,
@@ -53,7 +53,7 @@ export const MOCK_REVIEWS: Review[] = [
   {
     id: 'review-4',
     booking_id: 'booking-1',
-    paddle_id: '550e8400-e29b-41d4-a716-446655440001',
+    court_id: '550e8400-e29b-41d4-a716-446655440001',
     reviewer_id: 'user-654',
     reviewer_name: 'Alex Brown',
     rating: 4,
@@ -63,7 +63,7 @@ export const MOCK_REVIEWS: Review[] = [
   {
     id: 'review-5',
     booking_id: 'booking-6',
-    paddle_id: '550e8400-e29b-41d4-a716-446655440001',
+    court_id: '550e8400-e29b-41d4-a716-446655440001',
     reviewer_id: 'user-987',
     reviewer_name: 'Emma Davis',
     rating: 5,
@@ -89,7 +89,7 @@ export function generateUUID(): string {
  */
 export function getReviewsForPaddle(paddleId: string): Review[] {
   return MOCK_REVIEWS
-    .filter(r => r.paddle_id === paddleId)
+    .filter(r => r.court_id === paddleId)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 }
 
@@ -109,7 +109,7 @@ export function getAverageRating(paddleId: string): number {
  * Get the total review count for a paddle
  */
 export function getReviewCount(paddleId: string): number {
-  return MOCK_REVIEWS.filter(r => r.paddle_id === paddleId).length;
+  return MOCK_REVIEWS.filter(r => r.court_id === paddleId).length;
 }
 
 /**
@@ -135,7 +135,7 @@ export function addReview(
   const review: Review = {
     id: generateUUID(),
     booking_id: bookingId,
-    paddle_id: paddleId,
+    court_id: paddleId,
     reviewer_id: reviewerId,
     reviewer_name: reviewerName,
     rating,

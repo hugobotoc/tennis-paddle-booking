@@ -1,30 +1,30 @@
 <script>
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { getPaddleById } from '$lib/data/paddles';
+	import { getCourtById } from '$lib/data/courts';
 	import { createMockBooking } from '$lib/data/bookings';
 	import { checkoutStore, nextStep, previousStep, updateCheckoutState } from '$lib/stores/checkout';
 
-	let paddle;
+	let court;
 	let errorMessage = '';
 	let isProcessing = false;
 
-	// Load paddle and initialize checkout store
+	// Load court and initialize checkout store
 	$: {
-		const paddleId = $page.url.searchParams.get('paddle_id');
+		const courtId = $page.url.searchParams.get('court_id');
 		const startDate = $page.url.searchParams.get('start_date') || '';
 		const endDate = $page.url.searchParams.get('end_date') || '';
 
-		if (!paddleId) {
-			goto('/paddles');
+		if (!courtId) {
+			goto('/courts');
 		} else {
-			paddle = getPaddleById(paddleId);
-			if (!paddle) {
-				goto('/paddles');
+			court = getCourtById(courtId);
+			if (!court) {
+				goto('/courts');
 			} else {
-				// Initialize store with paddle_id and dates if provided
+				// Initialize store with court_id and dates if provided
 				updateCheckoutState({
-					paddle_id: paddleId,
+					court_id: courtId,
 					start_date: startDate,
 					end_date: endDate
 				});
@@ -34,7 +34,7 @@
 
 	// Calculate rental days and costs
 	$: totalDays = calculateTotalDays($checkoutStore.start_date, $checkoutStore.end_date);
-	$: subtotal = paddle ? paddle.price_per_hour * 24 * totalDays : 0;
+	$: subtotal = court ? court.price_per_hour * 24 * totalDays : 0;
 	$: deliveryFee = 10;
 	$: tax = subtotal * 0.1;
 	$: totalCost = subtotal + deliveryFee + tax;
@@ -122,18 +122,18 @@
 	}
 
 	async function handlePlaceOrder() {
-		if (!paddle) return;
+		if (!court) return;
 
 		isProcessing = true;
 
 		try {
 			// Create booking with mock user ID (demo user)
 			const booking = createMockBooking(
-				$checkoutStore.paddle_id,
+				$checkoutStore.court_id,
 				'demo-user-123', // Mock user ID
 				$checkoutStore.start_date,
 				$checkoutStore.end_date,
-				paddle.price_per_hour * 24, // Daily rate
+				court.price_per_hour * 24, // Daily rate
 				totalCost,
 				{
 					full_name: $checkoutStore.full_name,
@@ -159,7 +159,7 @@
 	}
 </script>
 
-{#if paddle}
+{#if court}
 	<div class="min-h-screen bg-base-100">
 		<!-- Header -->
 		<div class="bg-primary text-primary-content py-8">
@@ -255,7 +255,7 @@
 										aria-label="Select rental end date"
 										aria-required="true"
 									/>
-									<p class="text-xs text-base-content/70 mt-1">Choose when you'll return the paddle</p>
+									<p class="text-xs text-base-content/70 mt-1">Choose when you'll return the court</p>
 								</div>
 
 								{#if $checkoutStore.start_date && $checkoutStore.end_date}
@@ -276,7 +276,7 @@
 										<div>
 											<p class="font-semibold">Estimated Rental Duration</p>
 											<p class="text-sm">{totalDays} day{totalDays !== 1 ? 's' : ''}</p>
-											<p class="text-sm">Daily rate: ${paddle.price_per_hour}/hour (${paddle.price_per_hour *
+											<p class="text-sm">Daily rate: ${court.price_per_hour}/hour (${court.price_per_hour *
 												24}/day)</p>
 											<p class="text-sm font-semibold">Estimated total: ${totalCost.toFixed(2)}</p>
 										</div>
@@ -284,8 +284,8 @@
 								{/if}
 
 								<div class="flex gap-4">
-									<a href={`/paddles/${paddle.id}`} class="btn btn-ghost flex-1">
-										Back to Paddle
+									<a href={`/courts/${court.id}`} class="btn btn-ghost flex-1">
+										Back to Court
 									</a>
 									<button
 										class="btn btn-primary flex-1"
@@ -426,21 +426,21 @@
 							<div class="card-body">
 								<h2 class="card-title text-2xl mb-6">Review Your Order</h2>
 
-								<!-- Paddle Info -->
+								<!-- Court Info -->
 								<div class="mb-6 p-4 bg-base-200 rounded-lg">
 									<div class="flex gap-4">
 										<img
-											src={paddle.image_url}
-											alt={paddle.name}
+											src={court.image_url}
+											alt={court.name}
 											class="w-24 h-24 object-cover rounded"
 										/>
 										<div class="flex-1">
-											<p class="text-xs text-base-content/70 uppercase font-semibold mb-1">Paddle</p>
-											<h3 class="text-xl font-bold">{paddle.name}</h3>
-											<p class="text-sm text-base-content/70">{paddle.brand} {paddle.model}</p>
-											{#if paddle.avg_rating}
+											<p class="text-xs text-base-content/70 uppercase font-semibold mb-1">Court</p>
+											<h3 class="text-xl font-bold">{court.name}</h3>
+											<p class="text-sm text-base-content/70">{court.brand} {court.model}</p>
+											{#if court.avg_rating}
 												<p class="text-sm mt-2">
-													⭐ {paddle.avg_rating.toFixed(1)} rating
+													⭐ {court.avg_rating.toFixed(1)} rating
 												</p>
 											{/if}
 										</div>
@@ -505,7 +505,7 @@
 									<div class="space-y-2">
 										<div class="flex justify-between">
 											<span>Daily rate</span>
-											<span class="font-semibold">${(paddle.price_per_hour * 24).toFixed(2)}</span>
+											<span class="font-semibold">${(court.price_per_hour * 24).toFixed(2)}</span>
 										</div>
 										<div class="flex justify-between">
 											<span>Number of days</span>
@@ -689,17 +689,17 @@
 				</div>
 
 				<!-- Right: Order Summary (Sticky) -->
-				{#if paddle}
+				{#if court}
 					<div class="lg:col-span-1">
 						<div class="card bg-base-100 shadow-lg sticky top-8">
 							<div class="card-body">
 								<h3 class="card-title text-xl mb-4">Order Summary</h3>
 
-								<!-- Paddle Info -->
+								<!-- Court Info -->
 								<div class="mb-4">
 									<p class="text-xs text-base-content/70 font-semibold mb-1">PADDLE</p>
-									<p class="font-bold text-lg">{paddle.name}</p>
-									<p class="text-sm text-base-content/70">{paddle.brand} {paddle.model}</p>
+									<p class="font-bold text-lg">{court.name}</p>
+									<p class="text-sm text-base-content/70">{court.brand} {court.model}</p>
 								</div>
 
 								<div class="divider my-2"></div>
@@ -722,7 +722,7 @@
 									<div class="mb-4">
 										<div class="flex justify-between text-sm mb-1">
 											<span class="text-base-content/70">Daily rate:</span>
-											<span class="font-semibold">${(paddle.price_per_hour * 24).toFixed(2)}</span>
+											<span class="font-semibold">${(court.price_per_hour * 24).toFixed(2)}</span>
 										</div>
 										<div class="flex justify-between text-sm mb-1">
 											<span class="text-base-content/70">Subtotal:</span>
@@ -755,12 +755,12 @@
 		</div>
 	</div>
 {:else}
-	<!-- 404: Paddle not found -->
+	<!-- 404: Court not found -->
 	<div class="min-h-screen flex items-center justify-center bg-base-100">
 		<div class="text-center">
 			<h1 class="text-5xl font-bold mb-4">Invalid Booking</h1>
-			<p class="text-lg text-base-content/70 mb-8">The paddle information is invalid or missing.</p>
-			<a href="/paddles" class="btn btn-primary">Browse Paddles</a>
+			<p class="text-lg text-base-content/70 mb-8">The court information is invalid or missing.</p>
+			<a href="/courts" class="btn btn-primary">Browse Courts</a>
 		</div>
 	</div>
 {/if}

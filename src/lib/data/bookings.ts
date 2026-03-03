@@ -1,30 +1,19 @@
 // Mock bookings data for development
 // This will be replaced with real Supabase queries once the backend is ready
 
-export interface DeliveryAddress {
-  full_name: string;
-  street_address: string;
-  city: string;
-  state: string;
-  zip: string;
-  phone: string;
-}
-
 export interface Booking {
   id: string;
-  paddle_id: string;
+  court_id: string;
   user_id: string;
-  start_date: string;
-  end_date: string;
-  delivery_address: DeliveryAddress;
-  daily_rate: number;
+  user_name: string;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  court_name: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   total_price: number;
-  status: 'confirmed' | 'pending' | 'completed' | 'cancelled';
-  created_at: Date;
+  hourly_rate: number;
 }
-
-// In-memory storage for mock bookings
-const MOCK_BOOKINGS: Booking[] = [];
 
 // Generate UUID
 function generateUUID(): string {
@@ -35,29 +24,114 @@ function generateUUID(): string {
   });
 }
 
+// In-memory storage for mock bookings
+const MOCK_BOOKINGS: Booking[] = [
+  {
+    id: '550e8400-e29b-41d4-a716-446655440101',
+    court_id: '550e8400-e29b-41d4-a716-446655440001',
+    user_id: 'user-001',
+    user_name: 'John Smith',
+    booking_date: '2026-03-05',
+    start_time: '10:00',
+    end_time: '11:00',
+    court_name: 'Central Court 1',
+    status: 'confirmed',
+    total_price: 25,
+    hourly_rate: 25
+  },
+  {
+    id: '550e8400-e29b-41d4-a716-446655440102',
+    court_id: '550e8400-e29b-41d4-a716-446655440002',
+    user_id: 'user-002',
+    user_name: 'Jane Doe',
+    booking_date: '2026-03-05',
+    start_time: '14:00',
+    end_time: '15:00',
+    court_name: 'Central Court 2',
+    status: 'confirmed',
+    total_price: 30,
+    hourly_rate: 30
+  },
+  {
+    id: '550e8400-e29b-41d4-a716-446655440103',
+    court_id: '550e8400-e29b-41d4-a716-446655440003',
+    user_id: 'user-001',
+    user_name: 'John Smith',
+    booking_date: '2026-03-06',
+    start_time: '09:00',
+    end_time: '10:00',
+    court_name: 'Padel Court A',
+    status: 'pending',
+    total_price: 20,
+    hourly_rate: 20
+  },
+  {
+    id: '550e8400-e29b-41d4-a716-446655440104',
+    court_id: '550e8400-e29b-41d4-a716-446655440001',
+    user_id: 'user-003',
+    user_name: 'Mike Johnson',
+    booking_date: '2026-03-06',
+    start_time: '15:00',
+    end_time: '17:00',
+    court_name: 'Central Court 1',
+    status: 'confirmed',
+    total_price: 50,
+    hourly_rate: 25
+  },
+  {
+    id: '550e8400-e29b-41d4-a716-446655440105',
+    court_id: '550e8400-e29b-41d4-a716-446655440004',
+    user_id: 'user-002',
+    user_name: 'Jane Doe',
+    booking_date: '2026-03-07',
+    start_time: '11:00',
+    end_time: '12:00',
+    court_name: 'Padel Court B',
+    status: 'confirmed',
+    total_price: 20,
+    hourly_rate: 20
+  },
+  {
+    id: '550e8400-e29b-41d4-a716-446655440106',
+    court_id: '550e8400-e29b-41d4-a716-446655440002',
+    user_id: 'user-003',
+    user_name: 'Mike Johnson',
+    booking_date: '2026-03-07',
+    start_time: '16:00',
+    end_time: '17:00',
+    court_name: 'Central Court 2',
+    status: 'pending',
+    total_price: 30,
+    hourly_rate: 30
+  }
+];
+
 /**
  * Create a new mock booking
  */
 export function createMockBooking(
-  paddle_id: string,
+  court_id: string,
   user_id: string,
-  start_date: string,
-  end_date: string,
-  daily_rate: number,
-  total_price: number,
-  delivery_address: DeliveryAddress
+  user_name: string,
+  booking_date: string,
+  start_time: string,
+  end_time: string,
+  court_name: string,
+  hourly_rate: number,
+  total_price: number
 ): Booking {
   const booking: Booking = {
     id: generateUUID(),
-    paddle_id,
+    court_id,
     user_id,
-    start_date,
-    end_date,
-    delivery_address,
-    daily_rate,
+    user_name,
+    booking_date,
+    start_time,
+    end_time,
+    court_name,
+    hourly_rate,
     total_price,
-    status: 'confirmed',
-    created_at: new Date()
+    status: 'confirmed'
   };
 
   MOCK_BOOKINGS.push(booking);

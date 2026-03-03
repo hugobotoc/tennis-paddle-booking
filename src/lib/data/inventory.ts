@@ -1,94 +1,90 @@
-import { MOCK_PADDLES, type Paddle } from './paddles';
+import { MOCK_COURTS, type Court } from '$lib/data/courts';
 
-export interface CreatePaddleInput {
+export interface CreateCourtInput {
   name: string;
-  brand: string;
-  model: string;
-  description: string;
-  weight: string;
-  grip_type: string;
-  material: string;
-  frame_thickness: string;
-  price_per_hour: number;
-  condition: 'excellent' | 'good' | 'fair';
+  location: string;
+  type: 'tennis' | 'padel';
+  surface: string;
+  hourly_rate: number;
+  total_slots: number;
   available_now: boolean;
   image_url: string;
+  description: string;
 }
 
-export interface EditPaddleInput extends CreatePaddleInput {
+export interface EditCourtInput extends CreateCourtInput {
   id: string;
 }
 
-export function getAllPaddles(): Paddle[] {
-  return [...MOCK_PADDLES];
+export function getAllCourts(): Court[] {
+  return [...MOCK_COURTS];
 }
 
-export function getPaddleById(id: string): Paddle | undefined {
-  return MOCK_PADDLES.find(p => p.id === id);
+export function getCourtById(id: string): Court | undefined {
+  return MOCK_COURTS.find(p => p.id === id);
 }
 
-export function createPaddle(input: CreatePaddleInput): Paddle {
-  if (!input.name || !input.brand) {
-    throw new Error('Name and brand are required');
+export function createCourt(input: CreateCourtInput): Court {
+  if (!input.name || !input.location) {
+    throw new Error('Name and location are required');
   }
-  if (input.price_per_hour < 0) {
-    throw new Error('Price must be non-negative');
+  if (input.hourly_rate < 0) {
+    throw new Error('Hourly rate must be non-negative');
   }
 
-  const newPaddle: Paddle = {
-    id: `paddle-${Date.now()}`,
-    ...input,
-    avg_rating: 0
+  const newCourt: Court = {
+    id: `court-${Date.now()}`,
+    ...input
   };
 
-  MOCK_PADDLES.push(newPaddle);
-  console.log('[Paddle Created]', newPaddle);
-  return newPaddle;
+  MOCK_COURTS.push(newCourt);
+  console.log('[Court Created]', newCourt);
+  return newCourt;
 }
 
-export function updatePaddle(id: string, input: CreatePaddleInput): Paddle {
-  const paddle = MOCK_PADDLES.find(p => p.id === id);
-  if (!paddle) {
-    throw new Error('Paddle not found');
+export function updateCourt(id: string, input: CreateCourtInput): Court {
+  const court = MOCK_COURTS.find(p => p.id === id);
+  if (!court) {
+    throw new Error('Court not found');
   }
 
-  if (!input.name || !input.brand) {
-    throw new Error('Name and brand are required');
+  if (!input.name || !input.location) {
+    throw new Error('Name and location are required');
   }
-  if (input.price_per_hour < 0) {
-    throw new Error('Price must be non-negative');
+  if (input.hourly_rate < 0) {
+    throw new Error('Hourly rate must be non-negative');
   }
 
-  Object.assign(paddle, input);
-  console.log('[Paddle Updated]', paddle);
-  return paddle;
+  Object.assign(court, input);
+  console.log('[Court Updated]', court);
+  return court;
 }
 
-export function deletePaddle(id: string): boolean {
-  const index = MOCK_PADDLES.findIndex(p => p.id === id);
+export function deleteCourt(id: string): boolean {
+  const index = MOCK_COURTS.findIndex(p => p.id === id);
   if (index === -1) {
-    throw new Error('Paddle not found');
+    throw new Error('Court not found');
   }
 
-  MOCK_PADDLES.splice(index, 1);
-  console.log('[Paddle Deleted]', id);
+  MOCK_COURTS.splice(index, 1);
+  console.log('[Court Deleted]', id);
   return true;
 }
 
-export function validatePaddleInput(input: Partial<CreatePaddleInput>): string[] {
+export function validateCourtInput(input: Partial<CreateCourtInput>): string[] {
   const errors: string[] = [];
 
   if (!input.name || input.name.trim() === '') {
-    errors.push('Paddle name is required');
+    errors.push('Court name is required');
   }
-  if (!input.brand || input.brand.trim() === '') {
-    errors.push('Brand is required');
+  if (!input.location || input.location.trim() === '') {
+    errors.push('Location is required');
   }
-  if (!input.price_per_hour || input.price_per_hour < 0) {
-    errors.push('Price must be a positive number');
+  if (!input.hourly_rate || input.hourly_rate < 0) {
+    errors.push('Hourly rate must be a positive number');
   }
-  if (!input.condition || !['excellent', 'good', 'fair'].includes(input.condition)) {
-    errors.push('Condition must be excellent, good, or fair');
+  if (!input.type || !['tennis', 'padel'].includes(input.type)) {
+    errors.push('Type must be tennis or padel');
   }
 
   return errors;

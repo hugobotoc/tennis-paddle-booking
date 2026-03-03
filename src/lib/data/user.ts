@@ -21,13 +21,13 @@ export const CURRENT_USER: User = {
 
 /**
  * Mock user bookings for dashboard
- * Uses paddle IDs from MOCK_PADDLES to ensure consistency
+ * Uses paddle IDs from MOCK_COURTS to ensure consistency
  */
 export const MOCK_USER_BOOKINGS: Booking[] = [
   // Active Bookings (1 confirmed, 1 in progress)
   {
     id: 'booking-1',
-    paddle_id: '550e8400-e29b-41d4-a716-446655440001', // Wilson Pro Power Pro
+    court_id: '550e8400-e29b-41d4-a716-446655440001', // Wilson Pro Power Pro
     user_id: 'user-123',
     start_date: '2026-03-10',
     end_date: '2026-03-12',
@@ -46,7 +46,7 @@ export const MOCK_USER_BOOKINGS: Booking[] = [
   },
   {
     id: 'booking-2',
-    paddle_id: '550e8400-e29b-41d4-a716-446655440003', // Yonex Vcore 98
+    court_id: '550e8400-e29b-41d4-a716-446655440003', // Yonex Vcore 98
     user_id: 'user-123',
     start_date: '2026-03-05',
     end_date: '2026-03-08',
@@ -66,7 +66,7 @@ export const MOCK_USER_BOOKINGS: Booking[] = [
   // Past Bookings (completed/cancelled)
   {
     id: 'booking-3',
-    paddle_id: '550e8400-e29b-41d4-a716-446655440002', // Head Prestige Speed
+    court_id: '550e8400-e29b-41d4-a716-446655440002', // Head Prestige Speed
     user_id: 'user-123',
     start_date: '2026-02-15',
     end_date: '2026-02-17',
@@ -85,7 +85,7 @@ export const MOCK_USER_BOOKINGS: Booking[] = [
   },
   {
     id: 'booking-4',
-    paddle_id: '550e8400-e29b-41d4-a716-446655440004', // Dunlop Nitro Beginners
+    court_id: '550e8400-e29b-41d4-a716-446655440004', // Dunlop Nitro Beginners
     user_id: 'user-123',
     start_date: '2026-01-20',
     end_date: '2026-01-23',
@@ -105,7 +105,7 @@ export const MOCK_USER_BOOKINGS: Booking[] = [
   // Cancelled Booking
   {
     id: 'booking-5',
-    paddle_id: '550e8400-e29b-41d4-a716-446655440006', // Prince Beast 100
+    court_id: '550e8400-e29b-41d4-a716-446655440006', // Prince Beast 100
     user_id: 'user-123',
     start_date: '2026-02-01',
     end_date: '2026-02-03',

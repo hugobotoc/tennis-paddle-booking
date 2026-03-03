@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { getAllPaddles, createPaddle, updatePaddle, deletePaddle, validatePaddleInput } from '$lib/data/inventory';
+  import { getAllCourts, createCourt, updateCourt, deleteCourt, validateCourtInput } from '$lib/data/inventory';
 
   /** @type {import('$lib/data/paddles').Paddle[]} */
   let paddles = [];
@@ -31,7 +31,7 @@
   });
 
   function loadPaddles() {
-    paddles = getAllPaddles();
+    paddles = getAllCourts();
   }
 
   /**
@@ -70,7 +70,7 @@
   }
 
   function handleSubmit() {
-    formErrors = validatePaddleInput(formData);
+    formErrors = validateCourtInput(formData);
 
     if (formErrors.length > 0) {
       return;
@@ -78,10 +78,10 @@
 
     try {
       if (isEditing) {
-        updatePaddle(editingId, formData);
+        updateCourt(editingId, formData);
         successMessage = 'Paddle updated successfully!';
       } else {
-        createPaddle(formData);
+        createCourt(formData);
         successMessage = 'Paddle created successfully!';
       }
 
@@ -102,7 +102,7 @@
   function handleDelete(id) {
     if (confirm('Are you sure you want to delete this paddle?')) {
       try {
-        deletePaddle(id);
+        deleteCourt(id);
         loadPaddles();
         successMessage = 'Paddle deleted successfully!';
         setTimeout(() => {

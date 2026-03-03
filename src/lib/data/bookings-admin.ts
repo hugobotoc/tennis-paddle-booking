@@ -1,25 +1,24 @@
 import { getAllMockBookings, type Booking } from './bookings';
-import { MOCK_PADDLES } from './paddles';
 
-export interface BookingWithPaddleInfo extends Booking {
-  paddle_name: string;
+export interface BookingWithCourtInfo extends Booking {
+  court_full_name: string;
 }
 
-export function getAllBookingsWithPaddles(): BookingWithPaddleInfo[] {
+export function getAllBookingsWithPaddles(): BookingWithCourtInfo[] {
   const bookings = getAllMockBookings();
 
   return bookings.map(booking => ({
     ...booking,
-    paddle_name: MOCK_PADDLES.find(p => p.id === booking.paddle_id)?.name || 'Unknown Paddle'
+    court_full_name: booking.court_name
   }));
 }
 
-export function getBookingById(id: string): BookingWithPaddleInfo | undefined {
+export function getBookingById(id: string): BookingWithCourtInfo | undefined {
   const bookings = getAllBookingsWithPaddles();
   return bookings.find(b => b.id === id);
 }
 
-export function updateBookingStatus(id: string, status: 'pending' | 'active' | 'completed' | 'cancelled'): BookingWithPaddleInfo {
+export function updateBookingStatus(id: string, status: 'pending' | 'confirmed' | 'completed' | 'cancelled'): BookingWithCourtInfo {
   const bookings = getAllMockBookings();
   const booking = bookings.find(b => b.id === id);
 
@@ -27,7 +26,7 @@ export function updateBookingStatus(id: string, status: 'pending' | 'active' | '
     throw new Error('Booking not found');
   }
 
-  if (!['pending', 'active', 'completed', 'cancelled'].includes(status)) {
+  if (!['pending', 'confirmed', 'completed', 'cancelled'].includes(status)) {
     throw new Error('Invalid status');
   }
 
@@ -38,7 +37,7 @@ export function updateBookingStatus(id: string, status: 'pending' | 'active' | '
   return updated!;
 }
 
-export function getBookingsByStatus(status?: string): BookingWithPaddleInfo[] {
+export function getBookingsByStatus(status?: string): BookingWithCourtInfo[] {
   const bookings = getAllBookingsWithPaddles();
   if (!status) return bookings;
   return bookings.filter(b => b.status === status);

@@ -1,10 +1,10 @@
 <script>
 	import { page } from '$app/stores';
 	import { getMockBooking } from '$lib/data/bookings';
-	import { getPaddleById } from '$lib/data/paddles';
+	import { getCourtById } from '$lib/data/courts';
 
 	let booking;
-	let paddle;
+	let court;
 
 	// Load booking data
 	$: {
@@ -12,7 +12,7 @@
 		if (bookingId) {
 			booking = getMockBooking(bookingId);
 			if (booking) {
-				paddle = getPaddleById(booking.paddle_id);
+				court = getCourtById(booking.court_id);
 			}
 		}
 	}
@@ -36,7 +36,7 @@
 	}
 </script>
 
-{#if booking && paddle}
+{#if booking && court}
 	<div class="min-h-screen bg-base-100">
 		<!-- Success Header -->
 		<div class="bg-success text-success-content py-12">
@@ -56,7 +56,7 @@
 					/>
 				</svg>
 				<h1 class="text-5xl font-bold mb-4">Booking Confirmed!</h1>
-				<p class="text-xl opacity-90">Your paddle rental reservation has been successfully created.</p>
+				<p class="text-xl opacity-90">Your court rental reservation has been successfully created.</p>
 			</div>
 		</div>
 
@@ -75,21 +75,21 @@
 								<p class="text-xs text-base-content/70 mt-2">Keep this ID for your reference</p>
 							</div>
 
-							<!-- Paddle Info -->
+							<!-- Court Info -->
 							<div class="mb-6">
-								<h3 class="text-lg font-bold mb-4">Paddle Details</h3>
+								<h3 class="text-lg font-bold mb-4">Court Details</h3>
 								<div class="flex gap-4">
 									<img
-										src={paddle.image_url}
-										alt={paddle.name}
+										src={court.image_url}
+										alt={court.name}
 										class="w-32 h-32 object-cover rounded-lg"
 									/>
 									<div class="flex-1">
-										<p class="text-xs text-base-content/70 uppercase font-semibold mb-1">Paddle</p>
-										<h4 class="text-xl font-bold mb-1">{paddle.name}</h4>
-										<p class="text-base-content/70 mb-3">{paddle.brand} {paddle.model}</p>
+										<p class="text-xs text-base-content/70 uppercase font-semibold mb-1">Court</p>
+										<h4 class="text-xl font-bold mb-1">{court.name}</h4>
+										<p class="text-base-content/70 mb-3">{court.brand} {court.model}</p>
 										<p class="text-sm">
-											<span class="font-semibold">Daily rate:</span> ${paddle.price_per_hour}/hour (${paddle.price_per_hour *
+											<span class="font-semibold">Daily rate:</span> ${court.price_per_hour}/hour (${court.price_per_hour *
 												24}/day)
 										</p>
 									</div>
@@ -172,7 +172,7 @@
 							<div class="space-y-2 mb-4">
 								<div class="flex justify-between text-sm">
 									<span class="text-base-content/70">Daily rate:</span>
-									<span class="font-semibold">${paddle.price_per_hour * 24}/day</span>
+									<span class="font-semibold">${court.price_per_hour * 24}/day</span>
 								</div>
 								<div class="flex justify-between text-sm">
 									<span class="text-base-content/70">Duration:</span>
@@ -184,7 +184,7 @@
 									<span class="text-base-content/70">Subtotal:</span>
 									<span class="font-semibold"
 										>${(
-											paddle.price_per_hour *
+											court.price_per_hour *
 											24 *
 											calculateTotalDays(booking.start_date, booking.end_date)
 										).toFixed(2)}</span
@@ -198,7 +198,7 @@
 									<span class="text-base-content/70">Tax (10%):</span>
 									<span class="font-semibold"
 										>${(
-											(paddle.price_per_hour *
+											(court.price_per_hour *
 												24 *
 												calculateTotalDays(booking.start_date, booking.end_date) +
 												10) *
@@ -243,8 +243,8 @@
 					<a href="/dashboard" class="btn btn-primary btn-lg w-full">
 						View My Bookings
 					</a>
-					<a href="/paddles" class="btn btn-ghost btn-lg w-full">
-						Browse More Paddles
+					<a href="/courts" class="btn btn-ghost btn-lg w-full">
+						Browse More Courts
 					</a>
 				</div>
 			</div>
@@ -258,7 +258,7 @@
 			<p class="text-lg text-base-content/70 mb-8">We couldn't find the booking you're looking for.</p>
 			<div class="flex gap-4 justify-center">
 				<a href="/dashboard" class="btn btn-primary">View My Bookings</a>
-				<a href="/paddles" class="btn btn-ghost">Browse Paddles</a>
+				<a href="/courts" class="btn btn-ghost">Browse Courts</a>
 			</div>
 		</div>
 	</div>

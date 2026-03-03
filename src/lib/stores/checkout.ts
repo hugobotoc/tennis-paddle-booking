@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 
 export interface CheckoutState {
   step: 1 | 2 | 3 | 4;
-  paddle_id: string;
+  court_id: string;
   start_date: string;
   end_date: string;
   full_name: string;
@@ -16,7 +16,7 @@ export interface CheckoutState {
 
 const initialState: CheckoutState = {
   step: 1,
-  paddle_id: '',
+  court_id: '',
   start_date: '',
   end_date: '',
   full_name: '',

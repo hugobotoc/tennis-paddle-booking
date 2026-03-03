@@ -1,50 +1,50 @@
 <script>
-	import { MOCK_PADDLES } from '$lib/data/paddles';
+	import { MOCK_COURTS } from '$lib/data/courts';
 
-	let filteredPaddles = MOCK_PADDLES;
+	let filteredCourts = MOCK_COURTS;
 
 	let searchTerm = '';
-	let selectedBrand = 'all';
-	let maxPrice = 20;
+	let selectedType = 'all';
+	let maxPrice = 35;
 
-	// Get unique brands for filter
-	const brands = Array.from(new Set(MOCK_PADDLES.map(p => p.brand))).sort();
+	// Get unique court types
+	const courtTypes = Array.from(new Set(MOCK_COURTS.map(c => c.type))).sort();
 
-	function filterPaddles() {
-		filteredPaddles = MOCK_PADDLES.filter(paddle => {
+	function filterCourts() {
+		filteredCourts = MOCK_COURTS.filter(court => {
 			const matchesSearch =
 				searchTerm === '' ||
-				paddle.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				paddle.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				paddle.name.toLowerCase().includes(searchTerm.toLowerCase());
+				court.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				court.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				court.surface.toLowerCase().includes(searchTerm.toLowerCase());
 
-			const matchesBrand = selectedBrand === 'all' || paddle.brand === selectedBrand;
-			const matchesPrice = paddle.price_per_hour <= maxPrice;
+			const matchesType = selectedType === 'all' || court.type === selectedType;
+			const matchesPrice = court.hourly_rate <= maxPrice;
 
-			return matchesSearch && matchesBrand && matchesPrice;
+			return matchesSearch && matchesType && matchesPrice;
 		});
 	}
 
 	function handleSearch(e) {
 		searchTerm = e.target.value;
-		filterPaddles();
+		filterCourts();
 	}
 
-	function handleBrandChange(e) {
-		selectedBrand = e.target.value;
-		filterPaddles();
+	function handleTypeChange(e) {
+		selectedType = e.target.value;
+		filterCourts();
 	}
 
 	function handlePriceChange(e) {
 		maxPrice = parseInt(e.target.value);
-		filterPaddles();
+		filterCourts();
 	}
 
 	function resetFilters() {
 		searchTerm = '';
-		selectedBrand = 'all';
-		maxPrice = 20;
-		filterPaddles();
+		selectedType = 'all';
+		maxPrice = 35;
+		filterCourts();
 	}
 </script>
 
@@ -52,8 +52,8 @@
 	<!-- Header -->
 	<div class="bg-primary text-primary-content py-8">
 		<div class="container mx-auto px-4">
-			<h1 class="text-4xl font-bold mb-2">Available Paddles</h1>
-			<p class="text-lg opacity-90">Find and rent the perfect paddle for your next game</p>
+			<h1 class="text-4xl font-bold mb-2">Available Courts</h1>
+			<p class="text-lg opacity-90">Find and book the perfect court for your next game</p>
 		</div>
 	</div>
 
@@ -71,29 +71,29 @@
 						<input
 							id="search"
 							type="text"
-							placeholder="Brand or model..."
+							placeholder="Name, location, or surface..."
 							class="input input-bordered"
 							value={searchTerm}
 							on:input={handleSearch}
-							aria-label="Search paddles by brand or model"
+							aria-label="Search courts by name, location, or surface"
 						/>
 					</div>
 
-					<!-- Brand Filter -->
+					<!-- Type Filter -->
 					<div class="form-control">
-						<label class="label" for="brand">
-							<span class="label-text font-semibold">Brand</span>
+						<label class="label" for="type">
+							<span class="label-text font-semibold">Court Type</span>
 						</label>
 						<select
-							id="brand"
+							id="type"
 							class="select select-bordered"
-							value={selectedBrand}
-							on:change={handleBrandChange}
-							aria-label="Filter by paddle brand"
+							value={selectedType}
+							on:change={handleTypeChange}
+							aria-label="Filter by court type"
 						>
-							<option value="all">All Brands</option>
-							{#each brands as brand}
-								<option value={brand}>{brand}</option>
+							<option value="all">All Types</option>
+							{#each courtTypes as type}
+								<option value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
 							{/each}
 						</select>
 					</div>
@@ -107,13 +107,13 @@
 							<input
 								id="price"
 								type="range"
-								min="5"
-								max="20"
+								min="10"
+								max="35"
 								step="1"
 								class="range range-primary flex-1"
 								value={maxPrice}
 								on:change={handlePriceChange}
-								aria-label="Filter by maximum price per hour"
+								aria-label="Filter by maximum hourly rate"
 							/>
 							<span class="font-bold text-lg w-12">${maxPrice}</span>
 						</div>
@@ -135,38 +135,30 @@
 
 		<!-- Results Count -->
 		<p class="text-lg font-semibold mb-6" aria-live="polite">
-			Showing {filteredPaddles.length} of {MOCK_PADDLES.length} paddles
+			Showing {filteredCourts.length} of {MOCK_COURTS.length} courts
 		</p>
 
-		<!-- Paddle Grid -->
-		{#if filteredPaddles.length > 0}
+		<!-- Court Grid -->
+		{#if filteredCourts.length > 0}
 			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-				{#each filteredPaddles as paddle (paddle.id)}
+				{#each filteredCourts as court (court.id)}
 					<div class="card bg-base-100 shadow-lg hover:shadow-2xl transition-shadow">
 						<!-- Image Container -->
 						<figure class="relative h-48 overflow-hidden bg-base-300">
 							<img
-								src={paddle.image_url}
-								alt="{paddle.name} - {paddle.brand} {paddle.model}"
+								src={court.image_url}
+								alt="{court.name} - {court.surface}"
 								class="w-full h-full object-cover hover:scale-105 transition-transform"
 							/>
-							<!-- Condition Badge -->
+							<!-- Type Badge -->
 							<div class="absolute top-2 right-2">
-								<span
-									class={`badge font-semibold capitalize ${
-										paddle.condition === 'excellent'
-											? 'badge-success'
-											: paddle.condition === 'good'
-												? 'badge-info'
-												: 'badge-warning'
-									}`}
-								>
-									{paddle.condition}
+								<span class="badge badge-primary font-semibold capitalize">
+									{court.type}
 								</span>
 							</div>
 							<!-- Availability Badge -->
 							<div class="absolute bottom-2 left-2">
-								{#if paddle.available_now}
+								{#if court.available_now}
 									<span class="badge badge-success gap-2">
 										<span class="inline-block w-2 h-2 bg-white rounded-full"></span>
 										Available Now
@@ -181,42 +173,32 @@
 						</figure>
 
 						<div class="card-body">
-							<!-- Brand and Model -->
-							<h2 class="card-title text-xl">{paddle.name}</h2>
+							<!-- Name -->
+							<h2 class="card-title text-xl">{court.name}</h2>
 							<p class="text-sm text-base-content/70">
-								{paddle.brand} {paddle.model}
+								{court.location}
+							</p>
+							<p class="text-sm text-base-content/60">
+								Surface: {court.surface}
 							</p>
 
-							<!-- Rating -->
-							<div class="flex items-center gap-2 mb-2">
-								<div class="flex gap-0.5" aria-label="{paddle.avg_rating} out of 5 stars">
-									{#each Array(5) as _, i}
-										<span
-											class={`text-lg ${
-												i < Math.floor(paddle.avg_rating)
-													? 'text-warning'
-													: i < Math.ceil(paddle.avg_rating)
-														? 'text-warning/50'
-														: 'text-base-300'
-											}`}
-										>
-											★
-										</span>
-									{/each}
-								</div>
-								<span class="text-sm font-semibold">{paddle.avg_rating}</span>
-								<span class="text-xs text-base-content/50">({paddle.total_reviews})</span>
+							<!-- Slots Info -->
+							<div class="text-sm text-base-content/60 mb-2">
+								{court.total_slots} available slots
 							</div>
 
 							<!-- Price -->
-							<div class="text-2xl font-bold text-primary mb-4">${paddle.price_per_hour}/hr</div>
+							<div class="text-2xl font-bold text-primary mb-4">${court.hourly_rate}/hr</div>
+
+							<!-- Description -->
+							<p class="text-sm mb-4 line-clamp-2">{court.description}</p>
 
 							<!-- View Details Button -->
 							<div class="card-actions justify-end">
 								<a
-									href={`/paddles/${paddle.id}`}
+									href={`/courts/${court.id}`}
 									class="btn btn-primary"
-									aria-label="View details for {paddle.name}"
+									aria-label="View details and book {court.name}"
 								>
 									View Details
 								</a>
@@ -240,7 +222,7 @@
 						d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 					></path>
 				</svg>
-				<span>No paddles match your filters. Try adjusting your search.</span>
+				<span>No courts match your filters. Try adjusting your search.</span>
 			</div>
 		{/if}
 	</div>

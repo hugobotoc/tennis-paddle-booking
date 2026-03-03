@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import { authStore } from '$lib/stores/auth';
   import { onMount } from 'svelte';
-  import { MOCK_PADDLES } from '$lib/data/paddles';
+  import { MOCK_COURTS } from '$lib/data/courts';
   import { canReviewBooking, hasReviewForBooking } from '$lib/data/reviews';
   import ReviewModal from '$lib/components/ReviewModal.svelte';
   import {
@@ -44,8 +44,8 @@
     await goto('/login');
   }
 
-  function getPaddleInfo(paddleId) {
-    return MOCK_PADDLES.find(p => p.id === paddleId);
+  function getCourtInfo(courtId) {
+    return MOCK_COURTS.find(p => p.id === courtId);
   }
 
   function handleCancelClick(booking) {
@@ -122,7 +122,7 @@
     <div class="navbar bg-base-200 shadow">
       <div class="flex-1">
         <a href="/dashboard" class="btn btn-ghost normal-case text-xl">
-          🎾 Tennis Paddle Booking
+          🎾 Tennis Court Booking
         </a>
       </div>
       <div class="flex-none gap-2">
@@ -146,7 +146,7 @@
               <div>{$authStore?.email || 'email'}</div>
             </li>
             <li>
-              <a href="/paddles">Browse Paddles</a>
+              <a href="/courts">Browse Courts</a>
             </li>
             <li>
               <button on:click={handleLogout}>Logout</button>
@@ -206,29 +206,29 @@
                 <h2 class="card-title justify-center">No Active Bookings</h2>
                 <p class="opacity-75">You don't have any active bookings right now.</p>
                 <div class="card-actions justify-center">
-                  <a href="/paddles" class="btn btn-primary">Start Exploring Paddles</a>
+                  <a href="/courts" class="btn btn-primary">Start Exploring Courts</a>
                 </div>
               </div>
             </div>
           {:else}
             {#each activeBookings as booking (booking.id)}
-              {@const paddle = getPaddleInfo(booking.paddle_id)}
+              {@const court = getCourtInfo(booking.court_id)}
               {@const daysCount = calculateBookingDays(booking.start_date, booking.end_date)}
               <div class="card bg-base-200 shadow-lg hover:shadow-xl transition-shadow">
                 <div class="card-body">
                   <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <!-- Paddle Image & Name -->
+                    <!-- Court Image & Name -->
                     <div class="flex flex-col items-start gap-3">
-                      {#if paddle}
+                      {#if court}
                         <img
-                          src={paddle.image_url}
-                          alt={paddle.name}
+                          src={court.image_url}
+                          alt={court.name}
                           class="w-full h-40 object-cover rounded-lg"
                         />
                         <div>
-                          <h3 class="card-title text-lg">{paddle.name}</h3>
+                          <h3 class="card-title text-lg">{court.name}</h3>
                           <p class="text-sm opacity-75">
-                            {paddle.brand} {paddle.model}
+                            {court.brand} {court.model}
                           </p>
                         </div>
                       {:else}
@@ -280,16 +280,16 @@
 
                       <div class="flex flex-col w-full gap-2">
                         <a
-                          href={`/paddles/${booking.paddle_id}`}
+                          href={`/courts/${booking.court_id}`}
                           class="btn btn-sm btn-outline btn-primary w-full"
-                          aria-label="View paddle details for {paddle?.name || 'this paddle'}"
+                          aria-label="View court details for {court?.name || 'this court'}"
                         >
-                          View Paddle
+                          View Court
                         </a>
                         <button
                           class="btn btn-sm btn-outline btn-error w-full"
                           on:click={() => handleCancelClick(booking)}
-                          aria-label="Cancel booking for {paddle?.name || 'this paddle'}"
+                          aria-label="Cancel booking for {court?.name || 'this court'}"
                         >
                           Cancel Booking
                         </button>
@@ -315,23 +315,23 @@
             </div>
           {:else}
             {#each pastBookings as booking (booking.id)}
-              {@const paddle = getPaddleInfo(booking.paddle_id)}
+              {@const court = getCourtInfo(booking.court_id)}
               {@const daysCount = calculateBookingDays(booking.start_date, booking.end_date)}
               <div class="card bg-base-200 shadow-lg hover:shadow-xl transition-shadow">
                 <div class="card-body">
                   <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <!-- Paddle Image & Name -->
+                    <!-- Court Image & Name -->
                     <div class="flex flex-col items-start gap-3">
-                      {#if paddle}
+                      {#if court}
                         <img
-                          src={paddle.image_url}
-                          alt={paddle.name}
+                          src={court.image_url}
+                          alt={court.name}
                           class="w-full h-40 object-cover rounded-lg"
                         />
                         <div>
-                          <h3 class="card-title text-lg">{paddle.name}</h3>
+                          <h3 class="card-title text-lg">{court.name}</h3>
                           <p class="text-sm opacity-75">
-                            {paddle.brand} {paddle.model}
+                            {court.brand} {court.model}
                           </p>
                         </div>
                       {:else}
@@ -383,17 +383,17 @@
 
                       <div class="flex flex-col w-full gap-2">
                         <a
-                          href={`/paddles/${booking.paddle_id}`}
+                          href={`/courts/${booking.court_id}`}
                           class="btn btn-sm btn-outline btn-primary w-full"
-                          aria-label="View paddle details for {paddle?.name || 'this paddle'}"
+                          aria-label="View court details for {court?.name || 'this court'}"
                         >
-                          View Paddle
+                          View Court
                         </a>
                         {#if canReviewBooking(booking, CURRENT_USER.id)}
                           <button
                             class="btn btn-sm btn-outline btn-warning w-full"
                             on:click={() => openReviewModal(booking)}
-                            aria-label="Leave review for {paddle?.name || 'this paddle'}"
+                            aria-label="Leave review for {court?.name || 'this court'}"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -442,23 +442,23 @@
             </div>
           {:else}
             {#each cancelledBookings as booking (booking.id)}
-              {@const paddle = getPaddleInfo(booking.paddle_id)}
+              {@const court = getCourtInfo(booking.court_id)}
               {@const daysCount = calculateBookingDays(booking.start_date, booking.end_date)}
               <div class="card bg-base-200 shadow-lg hover:shadow-xl transition-shadow opacity-75">
                 <div class="card-body">
                   <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <!-- Paddle Image & Name -->
+                    <!-- Court Image & Name -->
                     <div class="flex flex-col items-start gap-3">
-                      {#if paddle}
+                      {#if court}
                         <img
-                          src={paddle.image_url}
-                          alt={paddle.name}
+                          src={court.image_url}
+                          alt={court.name}
                           class="w-full h-40 object-cover rounded-lg"
                         />
                         <div>
-                          <h3 class="card-title text-lg">{paddle.name}</h3>
+                          <h3 class="card-title text-lg">{court.name}</h3>
                           <p class="text-sm opacity-75">
-                            {paddle.brand} {paddle.model}
+                            {court.brand} {court.model}
                           </p>
                         </div>
                       {:else}
@@ -510,11 +510,11 @@
 
                       <div class="flex flex-col w-full gap-2">
                         <a
-                          href={`/paddles/${booking.paddle_id}`}
+                          href={`/courts/${booking.court_id}`}
                           class="btn btn-sm btn-outline btn-primary w-full"
-                          aria-label="View paddle details for {paddle?.name || 'this paddle'}"
+                          aria-label="View court details for {court?.name || 'this court'}"
                         >
-                          View Paddle
+                          View Court
                         </a>
                       </div>
                     </div>
@@ -591,10 +591,10 @@
       <ReviewModal
         isOpen={showReviewModal}
         bookingId={reviewBooking.id}
-        paddleId={reviewBooking.paddle_id}
+        courtId={reviewBooking.court_id}
         reviewerId={CURRENT_USER.id}
         reviewerName={CURRENT_USER.name}
-        paddleName={getPaddleInfo(reviewBooking.paddle_id)?.name || 'Paddle'}
+        courtName={getCourtInfo(reviewBooking.court_id)?.name || 'Court'}
         on:submit={handleReviewSubmit}
         on:close={closeReviewModal}
       />
