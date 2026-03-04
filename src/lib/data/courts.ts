@@ -1,10 +1,18 @@
+export type CourtType = 
+  | 'tennis_indoor_hard'
+  | 'tennis_indoor_clay'
+  | 'tennis_outdoor_hard'
+  | 'tennis_outdoor_clay'
+  | 'padel_indoor'
+  | 'padel_outdoor';
+
 export interface Court {
   id: string;
+  club_id: string; // NEW: belongs to a club
   name: string;
   location: string;
-  type: 'tennis' | 'padel';
+  court_type: CourtType; // NEW: detailed type
   surface: string;
-  hourly_rate: number;
   total_slots: number;
   available_now: boolean;
   image_url: string;
@@ -12,11 +20,11 @@ export interface Court {
 }
 
 export interface CreateCourtInput {
+  club_id: string; // NEW
   name: string;
   location: string;
-  type: 'tennis' | 'padel';
+  court_type: CourtType; // NEW
   surface: string;
-  hourly_rate: number;
   total_slots: number;
   description: string;
 }
@@ -25,11 +33,11 @@ export interface CreateCourtInput {
 export let MOCK_COURTS: Court[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440001',
+    club_id: 'club-001', // Downtown Tennis Club
     name: 'Central Court 1',
     location: '123 Sports Lane, Downtown',
-    type: 'tennis',
-    surface: 'Hard Court',
-    hourly_rate: 25,
+    court_type: 'tennis_indoor_hard',
+    surface: 'Hard Court (acrylic)',
     total_slots: 8,
     available_now: true,
     image_url: 'https://via.placeholder.com/400x300?text=Tennis+Court+1',
@@ -37,11 +45,11 @@ export let MOCK_COURTS: Court[] = [
   },
   {
     id: '550e8400-e29b-41d4-a716-446655440002',
+    club_id: 'club-001', // Downtown Tennis Club
     name: 'Central Court 2',
     location: '123 Sports Lane, Downtown',
-    type: 'tennis',
-    surface: 'Clay',
-    hourly_rate: 30,
+    court_type: 'tennis_indoor_clay',
+    surface: 'Synthetic Clay',
     total_slots: 8,
     available_now: true,
     image_url: 'https://via.placeholder.com/400x300?text=Tennis+Court+2',
@@ -49,11 +57,11 @@ export let MOCK_COURTS: Court[] = [
   },
   {
     id: '550e8400-e29b-41d4-a716-446655440003',
+    club_id: 'club-002', // Padel Paradise
     name: 'Padel Court A',
     location: '456 Racket Avenue, Midtown',
-    type: 'padel',
-    surface: 'Synthetic',
-    hourly_rate: 20,
+    court_type: 'padel_indoor',
+    surface: 'Synthetic Grass with walls',
     total_slots: 10,
     available_now: true,
     image_url: 'https://via.placeholder.com/400x300?text=Padel+Court+A',
@@ -61,11 +69,11 @@ export let MOCK_COURTS: Court[] = [
   },
   {
     id: '550e8400-e29b-41d4-a716-446655440004',
+    club_id: 'club-002', // Padel Paradise
     name: 'Padel Court B',
     location: '456 Racket Avenue, Midtown',
-    type: 'padel',
-    surface: 'Synthetic',
-    hourly_rate: 20,
+    court_type: 'padel_indoor',
+    surface: 'Synthetic Grass with walls',
     total_slots: 10,
     available_now: true,
     image_url: 'https://via.placeholder.com/400x300?text=Padel+Court+B',
@@ -73,15 +81,15 @@ export let MOCK_COURTS: Court[] = [
   },
   {
     id: '550e8400-e29b-41d4-a716-446655440005',
+    club_id: 'club-001', // Downtown Tennis Club
     name: 'Sunset Court',
     location: '789 Valley Road, Suburbs',
-    type: 'tennis',
-    surface: 'Grass',
-    hourly_rate: 35,
+    court_type: 'tennis_outdoor_clay',
+    surface: 'Red Clay',
     total_slots: 6,
     available_now: false,
     image_url: 'https://via.placeholder.com/400x300?text=Grass+Court',
-    description: 'Premium grass court (seasonal availability)'
+    description: 'Premium clay court (seasonal availability)'
   }
 ];
 
@@ -89,8 +97,16 @@ export function getCourtById(id: string): Court | undefined {
   return MOCK_COURTS.find(c => c.id === id);
 }
 
-export function getCourtsByType(type: 'tennis' | 'padel'): Court[] {
-  return MOCK_COURTS.filter(c => c.type === type);
+export function getCourtsByType(type: string): Court[] {
+  return MOCK_COURTS.filter(c => {
+    if (type === 'tennis') return c.court_type.startsWith('tennis_');
+    if (type === 'padel') return c.court_type.startsWith('padel_');
+    return c.court_type === type;
+  });
+}
+
+export function getCourtsByClub(clubId: string): Court[] {
+  return MOCK_COURTS.filter(c => c.club_id === clubId);
 }
 
 export function getAllCourts(): Court[] {

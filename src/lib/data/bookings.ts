@@ -3,6 +3,7 @@
 
 export interface Booking {
   id: string;
+  club_id: string; // NEW: which club this booking is for
   court_id: string;
   user_id: string;
   user_name: string;
@@ -28,6 +29,7 @@ function generateUUID(): string {
 const MOCK_BOOKINGS: Booking[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440101',
+    club_id: 'club-001',
     court_id: '550e8400-e29b-41d4-a716-446655440001',
     user_id: 'user-001',
     user_name: 'John Smith',
@@ -41,6 +43,7 @@ const MOCK_BOOKINGS: Booking[] = [
   },
   {
     id: '550e8400-e29b-41d4-a716-446655440102',
+    club_id: 'club-001',
     court_id: '550e8400-e29b-41d4-a716-446655440002',
     user_id: 'user-002',
     user_name: 'Jane Doe',
@@ -54,6 +57,7 @@ const MOCK_BOOKINGS: Booking[] = [
   },
   {
     id: '550e8400-e29b-41d4-a716-446655440103',
+    club_id: 'club-002',
     court_id: '550e8400-e29b-41d4-a716-446655440003',
     user_id: 'user-001',
     user_name: 'John Smith',
@@ -67,6 +71,7 @@ const MOCK_BOOKINGS: Booking[] = [
   },
   {
     id: '550e8400-e29b-41d4-a716-446655440104',
+    club_id: 'club-001',
     court_id: '550e8400-e29b-41d4-a716-446655440001',
     user_id: 'user-003',
     user_name: 'Mike Johnson',
@@ -80,6 +85,7 @@ const MOCK_BOOKINGS: Booking[] = [
   },
   {
     id: '550e8400-e29b-41d4-a716-446655440105',
+    club_id: 'club-002',
     court_id: '550e8400-e29b-41d4-a716-446655440004',
     user_id: 'user-002',
     user_name: 'Jane Doe',
@@ -93,6 +99,7 @@ const MOCK_BOOKINGS: Booking[] = [
   },
   {
     id: '550e8400-e29b-41d4-a716-446655440106',
+    club_id: 'club-001',
     court_id: '550e8400-e29b-41d4-a716-446655440002',
     user_id: 'user-003',
     user_name: 'Mike Johnson',
