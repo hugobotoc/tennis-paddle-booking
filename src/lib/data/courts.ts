@@ -11,7 +11,18 @@ export interface Court {
   description: string;
 }
 
-export const MOCK_COURTS: Court[] = [
+export interface CreateCourtInput {
+  name: string;
+  location: string;
+  type: 'tennis' | 'padel';
+  surface: string;
+  hourly_rate: number;
+  total_slots: number;
+  description: string;
+}
+
+// eslint-disable-next-line prefer-const
+export let MOCK_COURTS: Court[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440001',
     name: 'Central Court 1',
@@ -84,4 +95,43 @@ export function getCourtsByType(type: 'tennis' | 'padel'): Court[] {
 
 export function getAllCourts(): Court[] {
   return [...MOCK_COURTS];
+}
+
+export function createCourt(input: CreateCourtInput): Court {
+  const newCourt: Court = {
+    id: `court-${Date.now()}`,
+    ...input,
+    available_now: true,
+    image_url: 'https://via.placeholder.com/400x300?text=' + encodeURIComponent(input.name)
+  };
+  MOCK_COURTS.push(newCourt);
+  return newCourt;
+}
+
+export function updateCourt(id: string, input: Partial<CreateCourtInput>): Court {
+  const court = MOCK_COURTS.find(c => c.id === id);
+  if (!court) {
+    throw new Error(`Court ${id} not found`);
+  }
+  Object.assign(court, input);
+  return court;
+}
+
+export function deleteCourt(id: string): void {
+  const index = MOCK_COURTS.findIndex(c => c.id === id);
+  if (index === -1) {
+    throw new Error(`Court ${id} not found`);
+  }
+  MOCK_COURTS.splice(index, 1);
+}
+
+export function validateCourtInput(input: Partial<CreateCourtInput>): string[] {
+  const errors: string[] = [];
+  if (!input.name?.trim()) errors.push('Court name is required');
+  if (!input.location?.trim()) errors.push('Location is required');
+  if (!input.type) errors.push('Type (tennis or padel) is required');
+  if (!input.surface?.trim()) errors.push('Surface type is required');
+  if (typeof input.hourly_rate !== 'number' || input.hourly_rate <= 0) errors.push('Hourly rate must be greater than 0');
+  if (typeof input.total_slots !== 'number' || input.total_slots <= 0) errors.push('Total slots must be greater than 0');
+  return errors;
 }
