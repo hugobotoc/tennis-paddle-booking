@@ -49,13 +49,18 @@ const CURRENCY_SYMBOLS: Record<Currency, string> = {
   CHF: 'CHF'
 };
 
-// Mock password hashing (in production, use bcrypt)
+// Password hashing with bcryptjs
+// Note: This is server-side code. Never call these from client components.
+import bcryptjs from 'bcryptjs';
+
 function hashPassword(password: string): string {
-  return Buffer.from(password).toString('base64');
+  // Synchronous hash (acceptable for mock data initialization)
+  const salt = bcryptjs.genSaltSync(10);
+  return bcryptjs.hashSync(password, salt);
 }
 
 function verifyPassword(password: string, hash: string): boolean {
-  return hashPassword(password) === hash;
+  return bcryptjs.compareSync(password, hash);
 }
 
 // Mock clubs storage
