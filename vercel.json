@@ -1,0 +1,6 @@
+{
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "sveltekit",
+  "nodejs": "20.x"
+}
