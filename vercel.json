@@ -1,5 +1,7 @@
 {
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "nodeVersion": "24.x"
+  "env": {
+    "NODE_VERSION": "24.x"
+  }
 }
