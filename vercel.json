@@ -1,6 +1,7 @@
 {
   "buildCommand": "npm run build",
   "installCommand": "npm install",
+  "outputDirectory": ".svelte-kit/output",
   "env": {
     "NODE_VERSION": "24.x"
   }
