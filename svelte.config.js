@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-vercel';
+import adapter from '@sveltejs/adapter-auto';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -6,9 +6,7 @@ const config = {
     dev: process.env.NODE_ENV === 'development'
   },
   kit: {
-    adapter: adapter({
-      runtime: 'nodejs18.x'
-    }),
+    adapter: adapter(),
   },
 };
 
